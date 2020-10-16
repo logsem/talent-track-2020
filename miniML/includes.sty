@@ -1,0 +1,69 @@
+\RequirePackage{amsmath, amssymb, amsthm}
+\RequirePackage{xcolor}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Text
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\TheLang}{miniML}
+\newcommand{\ML}{ML}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% BNF Grammar
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\BNFdef}{::=}
+\newcommand{\ALT}{~|~}
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Syntax
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\Keyword}[1]{{\color{blue} \mathsf{#1}}}
+
+\newcommand{\var}{x}
+\newcommand{\varB}{y}
+\newcommand{\varC}{z}
+\newcommand{\expr}{e}
+\newcommand{\val}{v}
+\newcommand{\valB}{w}
+\newcommand{\TT}{()}
+\newcommand{\Num}{n}
+\newcommand{\True}{\Keyword{true}}
+\newcommand{\False}{\Keyword{false}}
+\newcommand{\IfCmd}{\Keyword{if}}
+\newcommand{\ThenCmd}{\Keyword{then}}
+\def\If#1then#2{\IfCmd{}\;#1\;\ThenCmd{}\;#2}
+\newcommand{\Else}{\Keyword{else}\;}
+\newcommand{\Fst}{\Keyword{fst}\;}
+\newcommand{\Snd}{\Keyword{snd}\;}
+\newcommand{\Inj}[1]{\Keyword{inj}_{#1}\;}
+\newcommand{\MatchCmd}{\Keyword{match}}
+\newcommand{\WithCmd}{\Keyword{with}}
+\newcommand{\EndCmd}{\Keyword{end}}
+\def\Match#1with#2=>#3|#4=>#5end{\MatchCmd{}\;#1\;\WithCmd{}\;#2\Rightarrow#3 \;|\;#4\Rightarrow#5\;\EndCmd{}}
+\def\MatchV[#1]#2with#3=>#4|#5=>#6end{\begin{aligned}[#1]&\MatchCmd{}\;#2\;\WithCmd{}\\ & \hspace{0.5em}#3\Rightarrow#4\\ & | \hspace{0.2em}#5\Rightarrow#6\\ &\EndCmd{}\end{aligned}}
+\newcommand{\RecCmd}{\Keyword{rec}}
+\long\def\Rec#1 #2:=#3{\RecCmd\; #1(#2) := #3}
+\newcommand{\loc}{\ell}
+\newcommand{\RefCmd}{\Keyword{ref}}
+\newcommand{\alloc}{\Keyword{ref}\;}
+\newcommand{\deref}{!\;}
+
+\newcommand{\empelctx}{[]}
+\newcommand{\elctx}{K}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Typing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\Tunit}{\mathsf{Unit}}
+\newcommand{\Tint}{\mathbb{Z}}
+\newcommand{\Tbool}{\mathbb{B}}
+\newcommand{\Tref}[1]{\mathsf{ref}\left(#1\right)}
+
+\newcommand{\typ}{\tau}
+\newcommand{\ctx}{\Gamma}
+\newcommand{\hctx}{\Sigma}
+
+\newcommand{\typed}[4]{#1\;|\;#2 \vdash{} #3 : #4}
+

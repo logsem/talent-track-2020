@@ -1,0 +1,101 @@
+\documentclass{scrartcl}
+
+\usepackage{includes}
+\usepackage{hyperref}
+\usepackage{mathpartir}
+\usepackage{pftools}
+
+\begin{document}
+
+\title{\TheLang{}}
+
+\maketitle
+
+\section{Introduction}
+\label{sec:intro}
+The Programming language \TheLang{} is a simple, minimal version of the \ML{} programming language.
+
+\section{Statics}
+\label{sec:statics}
+
+\paragraph{Syntax}
+The expressions, values, evaluation contexts, and types of \TheLang{} are as follows:
+
+\begin{align*}
+  \expr \BNFdef{}
+  & \TT \ALT \tag{unit value} \\
+  & \Num \ALT \expr + \expr \ALT \expr - \expr \ALT \expr * \expr \ALT \expr \le \expr \ALT \expr < \expr \ALT \expr = \expr \ALT \tag{integers}\\
+  & \True \ALT \False \ALT \If \expr then \expr \Else \expr \ALT \tag{booleans} \\
+  & (\expr, \expr) \ALT \Fst \expr \ALT \Snd \expr \ALT \tag{products} \\
+  & \Inj{1} \expr \ALT \Inj{2} \expr \ALT \Match \expr with \Inj{1} \var => \expr | \Inj{2} \var => \expr end \tag{sums}\\
+  & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\
+  & \loc \ALT \alloc \expr \ALT \expr \gets \expr \ALT \deref \expr \tag{references}\\[1em]
+  \val \BNFdef{}
+  & \TT \ALT \Num \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \ALT \loc \tag{values}\\[1em]
+  \elctx \BNFdef{}
+  & \empelctx \ALT \elctx + \expr \ALT \val + \elctx \ALT \elctx - \expr \ALT \val - \elctx \ALT \elctx * \expr \ALT \val * \elctx \ALT \tag{evaluation contexts}\\
+  & \elctx \le \expr \ALT \val \le \elctx \ALT \elctx < \expr \ALT \val < \elctx \ALT \elctx = \expr \ALT \val = \elctx \ALT \If \elctx then \expr \Else \expr \ALT \\
+  & (\elctx, \expr) \ALT (\val, \elctx) \ALT \Fst \elctx \ALT \Snd \elctx \ALT \Inj{1} \elctx \ALT \Inj{2} \elctx \ALT\\
+  &  \Match \elctx with \Inj{1} \var => \expr | \Inj{2} \var => \expr end \ALT
+    \elctx~\expr \ALT \val~\elctx \ALT\\
+  & \alloc \elctx \ALT \elctx \gets \expr \ALT \val \gets \elctx \ALT \deref \elctx \\[1em]
+  \typ \BNFdef{}
+  & \Tunit \ALT \Tint \ALT \Tbool \ALT \typ \times \typ \ALT \typ + \typ \ALT \typ \to \typ \ALT \Tref{\typ}
+\end{align*}
+
+\paragraph{Typing}
+The typing rules for \TheLang{} are as follows:
+
+\begin{mathparpagebreakable}
+  \inferH{T-unit}{}{\typed{\hctx}{\ctx}{\TT}{\Tunit}}
+  \and
+  \inferH{T-int}{}{\typed{\hctx}{\ctx}{\Num}{\Tunit}}
+  \and
+  \inferH{T-add}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 + \expr_2}{\Tint}}
+  \and
+  \inferH{T-sub}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 - \expr_2}{\Tint}}
+  \and
+  \inferH{T-mul}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 * \expr_2}{\Tint}}
+  \and
+  \inferH{T-le}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 \le \expr_2}{\Tbool}}
+  \and
+  \inferH{T-lt}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 < \expr_2}{\Tbool}}
+  \and
+  \inferH{T-eq}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 = \expr_2}{\Tbool}}
+  \and
+  \inferH{T-true}{}{\typed{\hctx}{\ctx}{\False}{\Tbool}}
+  \and
+  \inferH{T-false}{}{\typed{\hctx}{\ctx}{\False}{\Tbool}}
+  \and
+  \inferH{T-if}{\typed{\hctx}{\ctx}{\expr_1}{\Tbool} \and \typed{\hctx}{\ctx}{\expr_2}{\typ} \and \typed{\hctx}{\ctx}{\expr_3}{\typ}}{\typed{\hctx}{\ctx}{\If \expr_1 then \expr_2 \; \Else \expr_3}{\typ}}
+  \and
+  \inferH{T-pair}{\typed{\hctx}{\ctx}{\expr_1}{\typ_1} \and \typed{\hctx}{\ctx}{\expr_2}{\typ_2}}{\typed{\hctx}{\ctx}{(\expr_1, \expr_2)}{\typ_1 \times \typ_2}}
+  \and
+  \inferH{T-fst}{\typed{\hctx}{\ctx}{\expr}{\typ_1 \times \typ_2}}{\typed{\hctx}{\ctx}{\Fst \expr}{\typ_1}}
+  \and
+  \inferH{T-snd}{\typed{\hctx}{\ctx}{\expr}{\typ_1 \times \typ_2}}{\typed{\hctx}{\ctx}{\Snd \expr}{\typ_2}}
+  \and
+  \inferH{T-inj1}{\typed{\hctx}{\ctx}{\expr}{\typ_1}}{\typed{\hctx}{\ctx}{\Inj{1} \expr}{\typ_1 + \typ_2}}
+  \and
+  \inferH{T-inj2}{\typed{\hctx}{\ctx}{\expr}{\typ_2}}{\typed{\hctx}{\ctx}{\Inj{2} \expr}{\typ_1 + \typ_2}}
+  \and
+  \inferH{T-match}{\typed{\hctx}{\ctx}{\expr}{\typ_1 + \typ_2} \and \typed{\hctx}{\ctx, \var : \typ_1}{\expr_1}{\typ} \and \typed{\hctx}{\ctx, \var : \typ_2}{\expr_2}{\typ}}{\typed{\hctx}{\ctx}{\Match \expr with \Inj{1} \var => \expr_1 | \Inj{2} \var => \expr_2 end}{\typ}}
+  \and
+  \inferH{T-rec}{\typed{\hctx}{\ctx, f : \typ_1 \to \typ_2, \var : \typ_1}{\expr}{\typ_2}}{\typed{\hctx}{\ctx}{\Rec f \var := \expr}{\typ_1 \to \typ_2}}
+  \and
+  \inferH{T-app}{\typed{\hctx}{\ctx}{\expr_1}{\typ_1 \to \typ_2} \and \typed{\hctx}{\ctx}{\expr_2}{\typ_1}}{\typed{\hctx}{\ctx}{\expr_1~\expr_2}{\typ_2}}
+  \and
+  \inferH{T-loc}{}{\typed{\hctx}{\ctx}{\loc}{\hctx(\loc)}}
+  \and
+  \inferH{T-alloc}{\typed{\hctx}{\ctx}{\expr}{\typ}}{\typed{\hctx}{\ctx}{\alloc \expr}{\Tref{\typ}}}
+  \and
+  \inferH{T-store}{\typed{\hctx}{\ctx}{\expr_1}{\Tref{\typ}} \and \typed{\hctx}{\ctx}{\expr_2}{\typ}}{\typed{\hctx}{\ctx}{\expr_1 \gets \expr_2}{\Tunit}}
+  \and
+  \inferH{T-load}{\typed{\hctx}{\ctx}{\expr}{\Tref{\typ}}}{\typed{\hctx}{\ctx}{\deref \expr_1 }{\typ}}
+\end{mathparpagebreakable}
+
+\section{Dynamics}
+\label{sec:dynamics}
+
+
+\end{document}
