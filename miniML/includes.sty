@@ -2,6 +2,11 @@
 \RequirePackage{xcolor}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Math
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\dom}{\mathit{dom}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Text
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\TheLang}{miniML}
@@ -28,7 +33,7 @@
 \newcommand{\val}{v}
 \newcommand{\valB}{w}
 \newcommand{\TT}{()}
-\newcommand{\Num}{n}
+\newcommand{\Num}[1]{\overline{#1}}
 \newcommand{\True}{\Keyword{true}}
 \newcommand{\False}{\Keyword{false}}
 \newcommand{\IfCmd}{\Keyword{if}}
@@ -53,11 +58,16 @@
 \newcommand{\empelctx}{[]}
 \newcommand{\elctx}{K}
 
+\newcommand{\subst}[3]{#1\left[#2 \mapsto #3 \right]}
+
+\newcommand{\heap}{h}
+\newcommand{\heapupd}[3]{#1\left[#2 := #3\right]}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Typing
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \newcommand{\Tunit}{\mathsf{Unit}}
-\newcommand{\Tint}{\mathbb{Z}}
+\newcommand{\Tnat}{\mathbb{N}}
 \newcommand{\Tbool}{\mathbb{B}}
 \newcommand{\Tref}[1]{\mathsf{ref}\left(#1\right)}
 
@@ -67,3 +77,9 @@
 
 \newcommand{\typed}[4]{#1\;|\;#2 \vdash{} #3 : #4}
 
+\newcommand{\heaptyped}[3]{#1 \vdash{} #2 : #3}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Operational semantics
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\mlreduces}[4]{\left(#1, #2\right) \to \left(#3, #4\right)}

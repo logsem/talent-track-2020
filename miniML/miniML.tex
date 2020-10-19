@@ -1,12 +1,18 @@
-\documentclass{scrartcl}
+\documentclass[10pt]{scrartcl}
 
 \usepackage{includes}
 \usepackage{hyperref}
 \usepackage{mathpartir}
 \usepackage{pftools}
 
+\usepackage{fullpage}
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+
 \begin{document}
 
+\author{Amin TImany}
 \title{\TheLang{}}
 
 \maketitle
@@ -24,14 +30,14 @@ The expressions, values, evaluation contexts, and types of \TheLang{} are as fol
 \begin{align*}
   \expr \BNFdef{}
   & \TT \ALT \tag{unit value} \\
-  & \Num \ALT \expr + \expr \ALT \expr - \expr \ALT \expr * \expr \ALT \expr \le \expr \ALT \expr < \expr \ALT \expr = \expr \ALT \tag{integers}\\
+  & \Num{n} \ALT \expr + \expr \ALT \expr - \expr \ALT \expr * \expr \ALT \expr \le \expr \ALT \expr < \expr \ALT \expr = \expr \ALT \tag{natural numbers}\\
   & \True \ALT \False \ALT \If \expr then \expr \Else \expr \ALT \tag{booleans} \\
   & (\expr, \expr) \ALT \Fst \expr \ALT \Snd \expr \ALT \tag{products} \\
   & \Inj{1} \expr \ALT \Inj{2} \expr \ALT \Match \expr with \Inj{1} \var => \expr | \Inj{2} \var => \expr end \tag{sums}\\
   & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\
   & \loc \ALT \alloc \expr \ALT \expr \gets \expr \ALT \deref \expr \tag{references}\\[1em]
   \val \BNFdef{}
-  & \TT \ALT \Num \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \ALT \loc \tag{values}\\[1em]
+  & \TT \ALT \Num{n} \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \ALT \loc \tag{values}\\[1em]
   \elctx \BNFdef{}
   & \empelctx \ALT \elctx + \expr \ALT \val + \elctx \ALT \elctx - \expr \ALT \val - \elctx \ALT \elctx * \expr \ALT \val * \elctx \ALT \tag{evaluation contexts}\\
   & \elctx \le \expr \ALT \val \le \elctx \ALT \elctx < \expr \ALT \val < \elctx \ALT \elctx = \expr \ALT \val = \elctx \ALT \If \elctx then \expr \Else \expr \ALT \\
@@ -40,7 +46,7 @@ The expressions, values, evaluation contexts, and types of \TheLang{} are as fol
     \elctx~\expr \ALT \val~\elctx \ALT\\
   & \alloc \elctx \ALT \elctx \gets \expr \ALT \val \gets \elctx \ALT \deref \elctx \\[1em]
   \typ \BNFdef{}
-  & \Tunit \ALT \Tint \ALT \Tbool \ALT \typ \times \typ \ALT \typ + \typ \ALT \typ \to \typ \ALT \Tref{\typ}
+  & \Tunit \ALT \Tnat \ALT \Tbool \ALT \typ \times \typ \ALT \typ + \typ \ALT \typ \to \typ \ALT \Tref{\typ}
 \end{align*}
 
 \paragraph{Typing}
@@ -49,19 +55,19 @@ The typing rules for \TheLang{} are as follows:
 \begin{mathparpagebreakable}
   \inferH{T-unit}{}{\typed{\hctx}{\ctx}{\TT}{\Tunit}}
   \and
-  \inferH{T-int}{}{\typed{\hctx}{\ctx}{\Num}{\Tunit}}
+  \inferH{T-int}{}{\typed{\hctx}{\ctx}{\Num{n}}{\Tunit}}
   \and
-  \inferH{T-add}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 + \expr_2}{\Tint}}
+  \inferH{T-add}{\typed{\hctx}{\ctx}{\expr_1}{\Tnat} \and \typed{\hctx}{\ctx}{\expr_2}{\Tnat}}{\typed{\hctx}{\ctx}{\expr_1 + \expr_2}{\Tnat}}
   \and
-  \inferH{T-sub}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 - \expr_2}{\Tint}}
+  \inferH{T-sub}{\typed{\hctx}{\ctx}{\expr_1}{\Tnat} \and \typed{\hctx}{\ctx}{\expr_2}{\Tnat}}{\typed{\hctx}{\ctx}{\expr_1 - \expr_2}{\Tnat}}
   \and
-  \inferH{T-mul}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 * \expr_2}{\Tint}}
+  \inferH{T-mul}{\typed{\hctx}{\ctx}{\expr_1}{\Tnat} \and \typed{\hctx}{\ctx}{\expr_2}{\Tnat}}{\typed{\hctx}{\ctx}{\expr_1 * \expr_2}{\Tnat}}
   \and
-  \inferH{T-le}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 \le \expr_2}{\Tbool}}
+  \inferH{T-le}{\typed{\hctx}{\ctx}{\expr_1}{\Tnat} \and \typed{\hctx}{\ctx}{\expr_2}{\Tnat}}{\typed{\hctx}{\ctx}{\expr_1 \le \expr_2}{\Tbool}}
   \and
-  \inferH{T-lt}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 < \expr_2}{\Tbool}}
+  \inferH{T-lt}{\typed{\hctx}{\ctx}{\expr_1}{\Tnat} \and \typed{\hctx}{\ctx}{\expr_2}{\Tnat}}{\typed{\hctx}{\ctx}{\expr_1 < \expr_2}{\Tbool}}
   \and
-  \inferH{T-eq}{\typed{\hctx}{\ctx}{\expr_1}{\Tint} \and \typed{\hctx}{\ctx}{\expr_2}{\Tint}}{\typed{\hctx}{\ctx}{\expr_1 = \expr_2}{\Tbool}}
+  \inferH{T-eq}{\typed{\hctx}{\ctx}{\expr_1}{\Tnat} \and \typed{\hctx}{\ctx}{\expr_2}{\Tnat}}{\typed{\hctx}{\ctx}{\expr_1 = \expr_2}{\Tbool}}
   \and
   \inferH{T-true}{}{\typed{\hctx}{\ctx}{\False}{\Tbool}}
   \and
@@ -94,8 +100,118 @@ The typing rules for \TheLang{} are as follows:
   \inferH{T-load}{\typed{\hctx}{\ctx}{\expr}{\Tref{\typ}}}{\typed{\hctx}{\ctx}{\deref \expr_1 }{\typ}}
 \end{mathparpagebreakable}
 
+We define the heap typing relation as follows:
+\
+\begin{mathparpagebreakable}
+  \inferH{heap-typing}{\forall \loc \in \dom(\heap).\; \typed{\hctx}{\ctx}{\heap(\loc)}{\hctx(\loc)}}{\heaptyped{\ctx}{\heap}{\hctx}}
+\end{mathparpagebreakable}
+
 \section{Dynamics}
 \label{sec:dynamics}
+The operational semantics of \TheLang{} is given below. A heap $\heap$ is a finite partial map from address to values.
 
+\newsavebox{\lecondition}
+\sbox{\lecondition}{$b = \begin{cases} \True & \text{if } n_1 \le n_2 \\ \False & \text{otherwise} \end{cases}$}
+\newsavebox{\ltcondition}
+\sbox{\ltcondition}{$b = \begin{cases} \True & \text{if } n_1 < n_2 \\ \False & \text{otherwise} \end{cases}$}
+\newsavebox{\eqcondition}
+\sbox{\eqcondition}{$b = \begin{cases} \True & \text{if } n_1 = n_2 \\ \False & \text{otherwise} \end{cases}$}
+
+\begin{mathparpagebreakable}
+  \inferH{E-add1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 + \expr_2}{\heap'}{\expr_1' + \expr_2}}
+  \and
+  \inferH{E-add2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 + \expr_2}{\heap'}{\val_1 + \expr_2'}}
+  \and
+  \inferH{E-add}{}{\mlreduces{\heap}{\Num{n_1} + \Num{n_2}}{\heap}{\Num{n_1 + n_2}}}
+  \and
+  \inferH{E-sub1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 - \expr_2}{\heap'}{\expr_1' - \expr_2}}
+  \and
+  \inferH{E-sub2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 - \expr_2}{\heap'}{\val_1 - \expr_2'}}
+  \and
+  \inferH{E-sub}{}{\mlreduces{\heap}{\Num{n_1} - \Num{n_2}}{\heap}{\Num{n_1 - n_2}}}
+  \and
+  \inferH{E-mul1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 * \expr_2}{\heap'}{\expr_1' * \expr_2}}
+  \and
+  \inferH{E-mul2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 * \expr_2}{\heap'}{\val_1 * \expr_2'}}
+  \and
+  \inferH{E-mul}{}{\mlreduces{\heap}{\Num{n_1} * \Num{n_2}}{\heap}{\Num{n_1 * n_2}}}
+  \and
+  \inferH{E-le1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 \le \expr_2}{\heap'}{\expr_1' \le \expr_2}}
+  \and
+  \inferH{E-le2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 \le \expr_2}{\heap'}{\val_1 \le \expr_2'}}
+  \and
+  \inferH{E-le}{\usebox{\lecondition}}{\mlreduces{\heap}{\Num{n_1} \le \Num{n_2}}{\heap}{b}}
+  \and
+  \inferH{E-lt1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 < \expr_2}{\heap'}{\expr_1' < \expr_2}}
+  \and
+  \inferH{E-lt2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 < \expr_2}{\heap'}{\val_1 < \expr_2'}}
+  \and
+  \inferH{E-lt}{\usebox{\lecondition}}{\mlreduces{\heap}{\Num{n_1} < \Num{n_2}}{\heap}{b}}
+  \and
+  \inferH{E-eq1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 = \expr_2}{\heap'}{\expr_1' = \expr_2}}
+  \and
+  \inferH{E-eq2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 = \expr_2}{\heap'}{\val_1 = \expr_2'}}
+  \and
+  \inferH{E-eq}{\usebox{\eqcondition}}{\mlreduces{\heap}{\Num{n_1} = \Num{n_2}}{\heap}{b}}
+  \and
+  \inferH{E-if}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\If \expr_1 then \expr_2\; \Else \expr_3}{\heap'}{\If \expr_1' then \expr_2\; \Else \expr_3}}
+  \and
+  \inferH{E-if-true}{}{\mlreduces{\heap}{\If \expr_1 then \expr_2\; \Else \expr_3}{\heap}{\expr_2}}
+  \and
+  \inferH{E-if-false}{}{\mlreduces{\heap}{\If \expr_1 then \expr_2\; \Else \expr_3}{\heap}{\expr_3}}
+  \and
+  \inferH{E-pair1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{(\expr_1, \expr_2)}{\heap'}{(\expr_1', \expr_2)}}
+  \and
+  \inferH{E-pair2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{(\val_1, \expr_2)}{\heap'}{(\val_1, \expr_2')}}
+  \and
+  \inferH{E-fst1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\Fst \expr_1}{\heap'}{\Fst \expr_1'}}
+  \and
+  \inferH{E-fst}{}{\mlreduces{\heap}{\Fst (\val_1, \val_2)}{\heap}{\val_1}}
+  \and
+  \inferH{E-snd1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\Snd \expr_1}{\heap'}{\Snd \expr_1'}}
+  \and
+  \inferH{E-snd}{}{\mlreduces{\heap}{\Snd (\val_1, \val_2)}{\heap}{\val_2}}
+  \and
+  \inferH{E-Inj1}{\mlreduces{\heap}{\expr}{\heap'}{\expr'}}{\mlreduces{\heap}{\Inj{1} \expr}{\heap'}{\Inj{1} \expr'}}
+  \and
+  \inferH{E-Inj2}{\mlreduces{\heap}{\expr}{\heap'}{\expr'}}{\mlreduces{\heap}{\Inj{2} \expr}{\heap'}{\Inj{2} \expr'}}
+  \and
+  \inferH{E-match}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\Match \expr_1 with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\Match \expr_1' with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}}
+  \and
+  \inferH{E-match-inj1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\Match {(\Inj{1}\val_1)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\subst{\expr_2}{\var}{\val_1}}}
+  \and
+  \inferH{E-match-inj2}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\Match {(\Inj{2}\val_1)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\subst{\expr_3}{\var}{\val_1}}}
+  \and
+  \inferH{E-app1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1~\expr_2}{\heap'}{\expr_1'~\expr_2}}
+  \and
+  \inferH{E-app2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1~\expr_2}{\heap'}{\val_1~\expr_2'}}
+  \and
+  \inferH{E-app}{}{\mlreduces{\heap}{(\Rec f \var :=  \expr)~\val_2}{\heap}{\subst{\subst{\expr}{f}{\Rec f \var :=  \expr}}{\var}{\val_2}}}
+  \and
+  \inferH{E-alloc1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\alloc \expr_1}{\heap'}{\alloc \expr_1'}}
+  \and
+  \inferH{E-alloc}{\loc \not\in \dom(\heap)}{\mlreduces{\heap}{\alloc \val}{\heap \cup \left\{(\loc, \val) \right\}}{\loc}}
+  \and
+  \inferH{E-store1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 \gets \expr_2}{\heap'}{\expr_1' \gets \expr_2}}
+  \and
+  \inferH{E-store2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\val_1 \gets \expr_2}{\heap'}{\val_1 \gets \expr_2'}}
+  \and
+  \inferH{E-store}{\loc \in \dom(\heap)}{\mlreduces{\heap}{\loc \gets \val}{\heapupd{\heap}{\loc}{\val}}{\TT}}
+  \and
+  \inferH{E-load1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\deref \expr_1}{\heap'}{\deref \expr_1'}}
+  \and
+  \inferH{E-alloc}{\heap(\loc) = \val}{\mlreduces{\heap}{\deref \loc}{\heap}{\val}}
+\end{mathparpagebreakable}
+
+\section{Safety}
+\label{sec:safety}
+
+\begin{theorem}[Progress]
+  
+\end{theorem}
+
+\begin{theorem}[Preservation]
+  
+\end{theorem}
 
 \end{document}
