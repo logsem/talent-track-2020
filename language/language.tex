@@ -12,7 +12,7 @@
 
 \begin{document}
 
-\author{Amin TImany}
+\author{Amin Timany}
 \title{\simplelang{}}
 
 \maketitle
@@ -30,11 +30,12 @@ The expressions, values, and types of \simplelang{} are as follows:
 \begin{align*}
   \expr \BNFdef{}
   & \TT \ALT \tag{unit value} \\
+  & \var \ALT \tag{variables} \\
   & \Num{n} \ALT \expr + \expr \ALT \expr - \expr \ALT \expr * \expr \ALT \expr \le \expr \ALT \expr < \expr \ALT \expr = \expr \ALT \tag{natural numbers}\\
   & \True \ALT \False \ALT \If \expr then \expr\; \Else \expr \ALT \tag{booleans} \\
   & (\expr, \expr) \ALT \Fst \expr \ALT \Snd \expr \ALT \tag{products} \\
   & \Inj{1} \expr \ALT \Inj{2} \expr \ALT \Match \expr with \Inj{1} \var => \expr | \Inj{2} \var => \expr end \tag{sums}\\
-  & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\
+  & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\[1em]
   \val \BNFdef{}
   & \TT \ALT \Num{n} \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \tag{values}\\[1em]
   \typ \BNFdef{}
@@ -45,6 +46,8 @@ The expressions, values, and types of \simplelang{} are as follows:
 The typing rules for \simplelang{} are as follows:
 
 \begin{mathparpagebreakable}
+  \inferH{T-var}{(\var : \typ) \in \ctx}{\typed{\ctx}{\var}{\typ}}
+  \and
   \inferH{T-unit}{}{\typed{\ctx}{\TT}{\Tunit}}
   \and
   \inferH{T-int}{}{\typed{\ctx}{\Num{n}}{\Tnat}}
@@ -185,7 +188,7 @@ The operational semantics of \simplelang{} is given below. A heap $\heap$ is a f
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\author{Amin TImany}
+\author{Amin Timany}
 \title{\miniML{}}
 
 \maketitle
@@ -203,12 +206,13 @@ The expressions, values, and types of \miniML{} are as follows:
 \begin{align*}
   \expr \BNFdef{}
   & \TT \ALT \tag{unit value} \\
+  & \var \ALT \tag{variables} \\
   & \Num{n} \ALT \expr + \expr \ALT \expr - \expr \ALT \expr * \expr \ALT \expr \le \expr \ALT \expr < \expr \ALT \expr = \expr \ALT \tag{natural numbers}\\
   & \True \ALT \False \ALT \If \expr then \expr\; \Else \expr \ALT \tag{booleans} \\
   & (\expr, \expr) \ALT \Fst \expr \ALT \Snd \expr \ALT \tag{products} \\
   & \Inj{1} \expr \ALT \Inj{2} \expr \ALT \Match \expr with \Inj{1} \var => \expr | \Inj{2} \var => \expr end \tag{sums}\\
   & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\
-  & \loc \ALT \alloc \expr \ALT \expr \gets \expr \ALT \deref \expr \tag{references}\\[1em]
+  & \loc \ALT \alloc \expr \ALT \expr \store \expr \ALT \deref \expr \tag{references}\\[1em]
   \val \BNFdef{}
   & \TT \ALT \Num{n} \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \ALT \loc \tag{values}\\[1em]
   \typ \BNFdef{}
@@ -219,6 +223,8 @@ The expressions, values, and types of \miniML{} are as follows:
 The typing rules for \miniML{} are as follows:
 
 \begin{mathparpagebreakable}
+  \inferH{T-var}{(\var : \typ) \in \ctx}{\mltyped{\ctx}{\hctx}{\var}{\typ}}
+  \and
   \inferH{T-unit}{}{\mltyped{\ctx}{\hctx}{\TT}{\Tunit}}
   \and
   \inferH{T-int}{}{\mltyped{\ctx}{\hctx}{\Num{n}}{\Tnat}}
@@ -261,7 +267,7 @@ The typing rules for \miniML{} are as follows:
   \and
   \inferH{T-alloc}{\mltyped{\ctx}{\hctx}{\expr}{\typ}}{\mltyped{\ctx}{\hctx}{\alloc \expr}{\Tref{\typ}}}
   \and
-  \inferH{T-store}{\mltyped{\ctx}{\hctx}{\expr_1}{\Tref{\typ}} \and \mltyped{\ctx}{\hctx}{\expr_2}{\typ}}{\mltyped{\ctx}{\hctx}{\expr_1 \gets \expr_2}{\Tunit}}
+  \inferH{T-store}{\mltyped{\ctx}{\hctx}{\expr_1}{\Tref{\typ}} \and \mltyped{\ctx}{\hctx}{\expr_2}{\typ}}{\mltyped{\ctx}{\hctx}{\expr_1 \store \expr_2}{\Tunit}}
   \and
   \inferH{T-load}{\mltyped{\ctx}{\hctx}{\expr}{\Tref{\typ}}}{\mltyped{\ctx}{\hctx}{\deref \expr }{\typ}}
 \end{mathparpagebreakable}
@@ -349,13 +355,13 @@ The operational semantics of \miniML{} is given below. A heap $\heap$ is a finit
   \and
   \inferH{E-alloc1}{\mlreduces{\heap}{\expr}{\heap'}{\expr'}}{\mlreduces{\heap}{\alloc \expr}{\heap'}{\alloc \expr'}}
   \and
-  \inferH{E-alloc}{\loc \not\in \dom(\heap)}{\mlreduces{\heap}{\alloc \val}{\heap \cup \left\{(\loc, \val) \right\}}{\loc}}
+  \inferH{E-alloc}{\loc \not\in \dom(\heap)}{\mlreduces{\heap}{\alloc \val}{\heapupd{\heap}{\loc}{\val}}{\loc}}
   \and
-  \inferH{E-store1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 \gets \expr_2}{\heap'}{\expr_1' \gets \expr_2}}
+  \inferH{E-store1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1 \store \expr_2}{\heap'}{\expr_1' \store \expr_2}}
   \and
-  \inferH{E-store2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_2'}}{\mlreduces{\heap}{\val_1 \gets \expr_2}{\heap'}{\val_1 \gets \expr_2'}}
+  \inferH{E-store2}{\mlreduces{\heap}{\expr_2}{\heap'}{\expr_2'}}{\mlreduces{\heap}{\val_1 \store \expr_2}{\heap'}{\val_1 \store \expr_2'}}
   \and
-  \inferH{E-store}{\loc \in \dom(\heap)}{\mlreduces{\heap}{\loc \gets \val}{\heapupd{\heap}{\loc}{\val}}{\TT}}
+  \inferH{E-store}{\loc \in \dom(\heap)}{\mlreduces{\heap}{\loc \store \val}{\heapupd{\heap}{\loc}{\val}}{\TT}}
   \and
   \inferH{E-load1}{\mlreduces{\heap}{\expr}{\heap'}{\expr'}}{\mlreduces{\heap}{\deref \expr}{\heap'}{\deref \expr'}}
   \and
