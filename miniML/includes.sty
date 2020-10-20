@@ -9,7 +9,8 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Text
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\TheLang}{miniML}
+\newcommand{\simplelang}{SimpleLang}
+\newcommand{\miniML}{miniML}
 \newcommand{\ML}{ML}
 
 
@@ -58,10 +59,10 @@
 \newcommand{\empelctx}{[]}
 \newcommand{\elctx}{K}
 
-\newcommand{\subst}[3]{#1\left[#2 \mapsto #3 \right]}
+\newcommand{\subst}[3]{\left[#2 \mapsto #3 \right]#1}
 
-\newcommand{\heap}{h}
-\newcommand{\heapupd}[3]{#1\left[#2 := #3\right]}
+\newcommand{\heap}{\mu}
+\newcommand{\heapupd}[3]{\left(#1, #2 \mapsto #3\right)}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Typing
@@ -75,11 +76,15 @@
 \newcommand{\ctx}{\Gamma}
 \newcommand{\hctx}{\Sigma}
 
-\newcommand{\typed}[4]{#1\;|\;#2 \vdash{} #3 : #4}
+\newcommand{\mltyped}[4]{#1\;|\;#2 \vdash{} #3 : #4}
+
+\newcommand{\typed}[3]{#1\; \vdash{} #2 : #3}
 
 \newcommand{\heaptyped}[3]{#1 \vdash{} #2 : #3}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Operational semantics
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\newcommand{\mlreduces}[4]{\left(#1, #2\right) \to \left(#3, #4\right)}
+\newcommand{\mlreduces}[4]{#2\;|\;#1 \to #4\;|\;#3}
+
+\newcommand{\reduces}[2]{#1 \to #2}
