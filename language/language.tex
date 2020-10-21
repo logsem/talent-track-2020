@@ -37,7 +37,7 @@ The expressions, values, and types of \simplelang{} are as follows:
   & \Inj{1} \expr \ALT \Inj{2} \expr \ALT \Match \expr with \Inj{1} \var => \expr | \Inj{2} \var => \expr end \tag{sums}\\
   & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\[1em]
   \val \BNFdef{}
-  & \TT \ALT \Num{n} \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \tag{values}\\[1em]
+  & \TT \ALT \Num{n} \ALT \True \ALT \False \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \tag{values}\\[1em]
   \typ \BNFdef{}
   & \Tunit \ALT \Tnat \ALT \Tbool \ALT \typ \times \typ \ALT \typ + \typ \ALT \typ \to \typ \tag{types}
 \end{align*}
@@ -50,7 +50,7 @@ The typing rules for \simplelang{} are as follows:
   \and
   \inferH{T-unit}{}{\typed{\ctx}{\TT}{\Tunit}}
   \and
-  \inferH{T-int}{}{\typed{\ctx}{\Num{n}}{\Tnat}}
+  \inferH{T-nat}{}{\typed{\ctx}{\Num{n}}{\Tnat}}
   \and
   \inferH{T-add}{\typed{\ctx}{\expr_1}{\Tnat} \and \typed{\ctx}{\expr_2}{\Tnat}}{\typed{\ctx}{\expr_1 + \expr_2}{\Tnat}}
   \and
@@ -137,9 +137,9 @@ The operational semantics of \simplelang{} is given below. A heap $\heap$ is a f
   \and
   \inferH{E-if}{\reduces{\expr_1}{\expr_1'}}{\reduces{\If \expr_1 then \expr_2\; \Else \expr_3}{\If \expr_1' then \expr_2\; \Else \expr_3}}
   \and
-  \inferH{E-if-true}{}{\reduces{\If \expr_1 then \expr_2\; \Else \expr_3}{\expr_2}}
+  \inferH{E-if-true}{}{\reduces{\If \True then \expr_2\; \Else \expr_3}{\expr_2}}
   \and
-  \inferH{E-if-false}{}{\reduces{\If \expr_1 then \expr_2\; \Else \expr_3}{\expr_3}}
+  \inferH{E-if-false}{}{\reduces{\If \False then \expr_2\; \Else \expr_3}{\expr_3}}
   \and
   \inferH{E-pair1}{\reduces{\expr_1}{\expr_1'}}{\reduces{(\expr_1, \expr_2)}{(\expr_1', \expr_2)}}
   \and
@@ -159,18 +159,18 @@ The operational semantics of \simplelang{} is given below. A heap $\heap$ is a f
   \and
   \inferH{E-match}{\reduces{\expr_1}{\expr_1'}}{\reduces{\Match \expr_1 with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\Match \expr_1' with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}}
   \and
-  \inferH{E-match-inj1}{}{\reduces{\Match {(\Inj{1}\val_1)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\subst{\expr_2}{\var}{\val_1}}}
+  \inferH{E-match-inj1}{}{\reduces{\Match {(\Inj{1}\val)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\subst{\expr_2}{\var}{\val}}}
   \and
-  \inferH{E-match-inj2}{}{\reduces{\Match {(\Inj{2}\val_1)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\subst{\expr_3}{\var}{\val_1}}}
+  \inferH{E-match-inj2}{}{\reduces{\Match {(\Inj{2}\val)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\subst{\expr_3}{\var}{\val}}}
   \and
   \inferH{E-app1}{\reduces{\expr_1}{\expr_1'}}{\reduces{\expr_1~\expr_2}{\expr_1'~\expr_2}}
   \and
   \inferH{E-app2}{\reduces{\expr_2}{\expr_2'}}{\reduces{\val_1~\expr_2}{\val_1~\expr_2'}}
   \and
-  \inferH{E-app}{}{\reduces{(\Rec f \var :=  \expr)~\val_2}{\subst{\subst{\expr}{f}{\Rec f \var :=  \expr}}{\var}{\val_2}}}
+  \inferH{E-app}{}{\reduces{(\Rec f \var :=  \expr)~\val}{\subst{\subst{\expr}{f}{\Rec f \var :=  \expr}}{\var}{\val}}}
 \end{mathparpagebreakable}
 
-\section{Safety}
+\section{Type Safety}
 \label{sec:safety}
 
 \begin{theorem}[Progress]
@@ -214,7 +214,7 @@ The expressions, values, and types of \miniML{} are as follows:
   & \Rec f \var := \expr \ALT \expr~\expr \ALT \tag{recursive functions}\\
   & \loc \ALT \alloc \expr \ALT \expr \store \expr \ALT \deref \expr \tag{references}\\[1em]
   \val \BNFdef{}
-  & \TT \ALT \Num{n} \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \ALT \loc \tag{values}\\[1em]
+  & \TT \ALT \Num{n} \ALT \True \ALT \False \ALT (\val, \val) \ALT \Inj{1} \val \ALT \Inj{2} \val \ALT \Rec f \var := \expr \ALT \loc \tag{values}\\[1em]
   \typ \BNFdef{}
   & \Tunit \ALT \Tnat \ALT \Tbool \ALT \typ \times \typ \ALT \typ + \typ \ALT \typ \to \typ \ALT \Tref{\typ} \tag{types}
 \end{align*}
@@ -227,7 +227,7 @@ The typing rules for \miniML{} are as follows:
   \and
   \inferH{T-unit}{}{\mltyped{\ctx}{\hctx}{\TT}{\Tunit}}
   \and
-  \inferH{T-int}{}{\mltyped{\ctx}{\hctx}{\Num{n}}{\Tnat}}
+  \inferH{T-nat}{}{\mltyped{\ctx}{\hctx}{\Num{n}}{\Tnat}}
   \and
   \inferH{T-add}{\mltyped{\ctx}{\hctx}{\expr_1}{\Tnat} \and \mltyped{\ctx}{\hctx}{\expr_2}{\Tnat}}{\mltyped{\ctx}{\hctx}{\expr_1 + \expr_2}{\Tnat}}
   \and
@@ -321,9 +321,9 @@ The operational semantics of \miniML{} is given below. A heap $\heap$ is a finit
   \and
   \inferH{E-if}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\If \expr_1 then \expr_2\; \Else \expr_3}{\heap'}{\If \expr_1' then \expr_2\; \Else \expr_3}}
   \and
-  \inferH{E-if-true}{}{\mlreduces{\heap}{\If \expr_1 then \expr_2\; \Else \expr_3}{\heap}{\expr_2}}
+  \inferH{E-if-true}{}{\mlreduces{\heap}{\If \True then \expr_2\; \Else \expr_3}{\heap}{\expr_2}}
   \and
-  \inferH{E-if-false}{}{\mlreduces{\heap}{\If \expr_1 then \expr_2\; \Else \expr_3}{\heap}{\expr_3}}
+  \inferH{E-if-false}{}{\mlreduces{\heap}{\If \False then \expr_2\; \Else \expr_3}{\heap}{\expr_3}}
   \and
   \inferH{E-pair1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{(\expr_1, \expr_2)}{\heap'}{(\expr_1', \expr_2)}}
   \and
@@ -343,9 +343,9 @@ The operational semantics of \miniML{} is given below. A heap $\heap$ is a finit
   \and
   \inferH{E-match}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\Match \expr_1 with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\Match \expr_1' with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}}
   \and
-  \inferH{E-match-inj1}{}{\mlreduces{\heap}{\Match {(\Inj{1}\val_1)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\subst{\expr_2}{\var}{\val_1}}}
+  \inferH{E-match-inj1}{}{\mlreduces{\heap}{\Match {(\Inj{1}\val)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\subst{\expr_2}{\var}{\val}}}
   \and
-  \inferH{E-match-inj2}{}{\mlreduces{\heap}{\Match {(\Inj{2}\val_1)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\subst{\expr_3}{\var}{\val_1}}}
+  \inferH{E-match-inj2}{}{\mlreduces{\heap}{\Match {(\Inj{2}\val)} with \Inj{1} \var => \expr_2 | \Inj{2} => \expr_3 end}{\heap'}{\subst{\expr_3}{\var}{\val}}}
   \and
   \inferH{E-app1}{\mlreduces{\heap}{\expr_1}{\heap'}{\expr_1'}}{\mlreduces{\heap}{\expr_1~\expr_2}{\heap'}{\expr_1'~\expr_2}}
   \and
@@ -368,7 +368,7 @@ The operational semantics of \miniML{} is given below. A heap $\heap$ is a finit
   \inferH{E-load}{\heap(\loc) = \val}{\mlreduces{\heap}{\deref \loc}{\heap}{\val}}
 \end{mathparpagebreakable}
 
-\section{Safety}
+\section{Type Safety}
 \label{sec:safety}
 
 \begin{theorem}[Progress]
