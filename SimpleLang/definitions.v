@@ -35,22 +35,11 @@ Inductive expr :=
   | matchwith (e1 e2 e3 : expr) (** Lasse: not sure if this is right **)
 
   (* recursive functions *)
-  | rec (e : expr) (** not quite sure about this *)
+  | rec (e : expr)
   | app (e1 e2 : expr)
 .
 
 (** VALUES **)
-(* Should this be defined as an inductive type? Values are a subset of expr, so... *)
-(* Inductive val :=
-  | unit_val
-  | Nat_val (n : nat)
-  | pair_val (v1 v2 : val)
-  | inj1_val (v : val)
-  | inj2_val (v : val)
-  | rec_val (e : expr)
-. *)
-
-(* Fixpoint definition of val *)
 Fixpoint val (e : expr) : Prop :=
   match e with
   | unit | Nat _ | true | false | rec _ => True
@@ -148,13 +137,6 @@ Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
       typed (TypeEnv.add t1 Gamma) e2 t ->
       typed (TypeEnv.add t2 Gamma) e3 t ->
       typed Gamma (matchwith e1 e2 e3) t
-  (* | T_match (e1 x e2 e3 : expr) (t t1 t2 : type) : (** NB! this is wrong! *) (*TODO*)
-      typed Gamma e1 (Sum t1 t2) ->
-      typed Gamma (inj1 x) t1 ->
-      typed Gamma (inj2 x) t2 ->
-      typed Gamma (*and x : t1 ???*) e2 t ->
-      typed Gamma (*and x : t2 ???*) e3 t ->
-      typed Gamma (matchwith e1 x) t *)
 
   (* recursive functions *)
   (* | T_rec TODO
