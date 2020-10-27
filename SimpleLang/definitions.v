@@ -139,7 +139,10 @@ Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
   | T_rec (e : expr) (t1 t2 : type) :
       typed (TypeEnv.add (TFun t1 t2) (TypeEnv.add t1 Gamma)) e t2 ->
       typed Gamma (rec e) (TFun t1 t2)
-  (* | T_app TODO *)
+  | T_app (e1 e2 : expr) (t1 t2 : type) :
+      typed Gamma e1 (TFun t1 t2) ->
+      typed Gamma e2 t1 ->
+      typed Gamma (app e1 e2) t2
 .
 
 Example two_plus_two_TNat : typed TypeEnv.empty (add (Nat 2) (Nat 2)) TNat.
