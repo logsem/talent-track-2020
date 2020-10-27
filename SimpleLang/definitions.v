@@ -1,17 +1,4 @@
-Notation "x :: l" := (cons x l)
-                     (at level 60, right associativity).
-Notation "[ ]" := nil.
-Notation "[ x ; .. ; y ]" := (cons x .. (cons y nil) ..).
-
-Fixpoint nth_error {X : Type} (l : list X) (n : nat) (** from the Poly-chapter in our Coq-book**)
-                   : option X :=
-  match l with
-  | nil => None
-  | a :: l' => match n with
-               | O => Some a
-               | S n' => nth_error l' n'
-               end
-  end.
+Require Import Coq.Lists.List.
 
 
 (* SYNTAX *)
@@ -28,14 +15,13 @@ Inductive expr :=
   | add (e1 e2 : expr)
   | sub (e1 e2 : expr)
   | mul (e1 e2 : expr)
-  | div (e1 e2 : expr)
   | le (e1 e2 : expr)
   | lt (e1 e2 : expr)
   | eq (e1 e2 : expr)
 
   (* booleans *)
-  | True (** possibly a bad name? **)
-  | False
+  | true
+  | false
   | ifthenelse (e1 e2 e3 : expr) (** TODO help - if then else already defined in Coq **)
 
   (* products *)
@@ -46,21 +32,22 @@ Inductive expr :=
   (* sums *)
   | inj1 (e : expr)
   | inj2 (e : expr)
-  | matchwith (e x : expr)(** TODO help - match e with inj1 x => e | inj2 x => e end **)
+  | matchwith (e1 e2 e3 : expr) (** Lasse: not sure if this is right **)
 
   (* recursive functions *)
-  | rec (e : expr) (** not quite sure about this *)
+  | rec (e : expr)
+  | app (e1 e2 : expr)
 .
 
-(** VALUES *)
-Inductive val :=
-  | unit_val
-  | Nat_val (n : nat)
-  | pair_val (v1 v2 : val)
-  | inj1_val (v : val)
-  | inj2_val (v : val)
-  | rec_val (e : expr)
-.
+(** VALUES **)
+Fixpoint val (e : expr) : Prop :=
+  match e with
+  | unit | Nat _ | true | false | rec _ => True
+  | pair v1 v2 => val v1 /\ val v2
+  | inj1 v | inj2 v => val v
+  | _ => False
+  end.
+
 
 (** TYPES *)
 Inductive type :=
@@ -73,14 +60,25 @@ Inductive type :=
 .
 
 (* TYPING *)
-Inductive typed (Gamma : list type) : expr -> type -> Prop :=
+(* Maybe this is a bit more 'clean', since it can be changed out if we decide to use a different id type *)
+Module TypeEnv.
+Definition type_env := list type.
+
+Definition empty : type_env := nil.
+
+Definition lookup : type_env -> id -> option type := @nth_error type.
+
+Definition add : type -> type_env -> type_env := cons.
+End TypeEnv.
+
+Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
   | T_unit : typed Gamma unit Unit
   | T_Var (x : id) (t : type) :
-      (*nth_error Gamma x = Some t -> (* TODO define nth_error function *)*)
+      TypeEnv.lookup Gamma x = Some t ->
       typed Gamma (Var x) t
 
   (* numbers *)
-  | T_int (n : nat) : typed Gamma (Nat n) TNat
+  | T_nat (n : nat) : typed Gamma (Nat n) TNat
   | T_add (e1 e2 : expr) : 
       typed Gamma e1 TNat ->
       typed Gamma e2 TNat ->
@@ -93,10 +91,6 @@ Inductive typed (Gamma : list type) : expr -> type -> Prop :=
       typed Gamma e1 TNat ->
       typed Gamma e2 TNat ->
       typed Gamma (mul e1 e2) TNat
-  | T_div (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-    typed Gamma (div e1 e2) TNat
   | T_le (e1 e2 : expr) : 
       typed Gamma e1 TNat ->
       typed Gamma e2 TNat ->
@@ -111,12 +105,13 @@ Inductive typed (Gamma : list type) : expr -> type -> Prop :=
       typed Gamma (eq e1 e2) TNat
 
   (* booleans*)
-  | T_true : typed Gamma True Bool
-  | T_false : typed Gamma False Bool
+  | T_true : typed Gamma true Bool
+  | T_false : typed Gamma false Bool
   | T_if (e1 e2 e3 : expr) (t : type) : 
       typed Gamma e1 Bool ->
       typed Gamma e2 t ->
-      typed Gamma e3 t
+      typed Gamma e3 t ->
+      typed Gamma (ifthenelse e1 e2 e3) t
 
   (* products *)
   | T_pair (e1 e2 : expr) (t1 t2 : type) :
@@ -137,15 +132,20 @@ Inductive typed (Gamma : list type) : expr -> type -> Prop :=
   | T_inj2 (e : expr) (t1 t2 : type) :
       typed Gamma e t2 ->
       typed Gamma (inj2 e) (Sum t1 t2)
-  | T_match (e1 x e2 e3 : expr) (t t1 t2 : type) : (** NB! this is wrong! *) (*TODO*)
+  | T_match (e1 e2 e3 : expr) (t1 t2 t :type) :
       typed Gamma e1 (Sum t1 t2) ->
-      typed Gamma (inj1 x) t1 ->
-      typed Gamma (inj2 x) t2 ->
-      typed Gamma (*and x : t1 ???*) e2 t ->
-      typed Gamma (*and x : t2 ???*) e3 t ->
-      typed Gamma (matchwith e1 x) t
+      typed (TypeEnv.add t1 Gamma) e2 t ->
+      typed (TypeEnv.add t2 Gamma) e3 t ->
+      typed Gamma (matchwith e1 e2 e3) t
 
   (* recursive functions *)
   (* | T_rec TODO
   | T_app TODO *)
 .
+
+Example two_plus_two_TNat : typed TypeEnv.empty (add (Nat 2) (Nat 2)) TNat.
+Proof.
+  apply T_add.
+  - apply T_nat.
+  - apply T_nat.
+Qed.
