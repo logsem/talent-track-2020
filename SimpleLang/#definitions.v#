@@ -147,3 +147,11 @@ Proof.
   - apply T_nat.
   - apply T_nat.
 Qed.
+
+Example iftruethen3else5 : typed TypeEnv.empty (ifthenelse (Bool true) (Nat 3) (Nat 5)) TNat.
+Proof.
+  apply T_if.
+  - apply T_bool.
+  - apply T_nat.
+  - apply T_nat.
+Qed.
