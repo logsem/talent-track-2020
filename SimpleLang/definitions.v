@@ -21,7 +21,7 @@ Inductive expr :=
 
   (* booleans *)
   | Bool (b : bool)
-  | ifthenelse (e1 e2 e3 : expr) (** TODO help - if then else already defined in Coq **)
+  | ifthenelse (e1 e2 e3 : expr)
 
   (* products *)
   | pair (e1 e2 : expr)
@@ -31,7 +31,7 @@ Inductive expr :=
   (* sums *)
   | inj1 (e : expr)
   | inj2 (e : expr)
-  | matchwith (e1 e2 e3 : expr) (** Lasse: not sure if this is right **)
+  | matchwith (e1 e2 e3 : expr)
 
   (* recursive functions *)
   | rec (e : expr)
@@ -59,7 +59,6 @@ Inductive type :=
 .
 
 (* TYPING *)
-(* Maybe this is a bit more 'clean', since it can be changed out if we decide to use a different id type *)
 Module TypeEnv.
 Definition type_env := list type.
 
@@ -137,13 +136,23 @@ Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
       typed Gamma (matchwith e1 e2 e3) t
 
   (* recursive functions *)
-  (* | T_rec TODO
-  | T_app TODO *)
+  | T_rec (e : expr) (t1 t2 : type) :
+      typed (TypeEnv.add (TFun t1 t2) (TypeEnv.add t1 Gamma)) e t2 ->
+      typed Gamma (rec e) (TFun t1 t2)
+  (* | T_app TODO *)
 .
 
 Example two_plus_two_TNat : typed TypeEnv.empty (add (Nat 2) (Nat 2)) TNat.
 Proof.
   apply T_add.
+  - apply T_nat.
+  - apply T_nat.
+Qed.
+
+Example iftruethen3else5 : typed TypeEnv.empty (ifthenelse (Bool true) (Nat 3) (Nat 5)) TNat.
+Proof.
+  apply T_if.
+  - apply T_bool.
   - apply T_nat.
   - apply T_nat.
 Qed.
