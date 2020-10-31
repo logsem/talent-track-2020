@@ -5,11 +5,38 @@ Require Import Coq.Arith.PeanoNat.
 (* SUBSTITUTION *)
 (** helper function: shift *)
 Fixpoint shift (i j : nat) (e : expr) : expr :=
-e. (* NB!: e is just a placeholder so I could define subst with shift *)
-(*match e with
+match e with
   | unit => unit
-  TODO continue...
-end.*)
+  | Var n => if (n <? i) then (Var n) else (Var (n+j))
+  
+  (*numbers*)
+  | Nat n => Nat n
+  | add e1 e2 => add (shift i j e1) (shift i j e2)
+  | sub e1 e2 => sub (shift i j e1) (shift i j e2)
+  | mul e1 e2 => mul (shift i j e1) (shift i j e2)
+  | le e1 e2 => le (shift i j e1) (shift i j e2)
+  | lt e1 e2 => lt (shift i j e1) (shift i j e2)
+  | eq e1 e2 => eq (shift i j e1) (shift i j e2)
+  
+  (* booleans *)
+  | Bool b => Bool b
+  | ifthenelse e1 e2 e3 => ifthenelse (shift i j e1) (shift i j e2) (shift i j e2)
+  
+  (* products *)
+  | pair e1 e2 => pair (shift i j e1) (shift i j e2)
+  | fst e1 => fst (shift i j e1)
+  | snd e1 => snd (shift i j e1)
+  
+  (* sums *)
+  | inj1 e1 => inj1 (shift i j e1)
+  | inj2 e1 => inj2 (shift i j e1)
+  | matchwith e1 e2 e3 => matchwith (shift i j e1) (shift (i+1) j e2) (shift (i+1) j e3)
+
+  (* recursive functions *)
+  | rec e1 => rec (shift (i+2) j e1)
+  | app e1 e2 => app (shift i j e1) (shift i j e2)
+end
+.
 
 (** in expression e substitute variable i with s *)
 Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
