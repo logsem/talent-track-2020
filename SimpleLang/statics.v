@@ -20,9 +20,8 @@ Inductive expr :=
   | eq (e1 e2 : expr)
 
   (* booleans *)
-  | true
-  | false
-  | ifthenelse (e1 e2 e3 : expr) (** TODO help - if then else already defined in Coq **)
+  | Bool (b : bool)
+  | ifthenelse (e1 e2 e3 : expr)
 
   (* products *)
   | pair (e1 e2 : expr)
@@ -32,7 +31,7 @@ Inductive expr :=
   (* sums *)
   | inj1 (e : expr)
   | inj2 (e : expr)
-  | matchwith (e1 e2 e3 : expr) (** Lasse: not sure if this is right **)
+  | matchwith (e1 e2 e3 : expr)
 
   (* recursive functions *)
   | rec (e : expr)
@@ -42,7 +41,7 @@ Inductive expr :=
 (** VALUES **)
 Fixpoint val (e : expr) : Prop :=
   match e with
-  | unit | Nat _ | true | false | rec _ => True
+  | unit | Nat _ | Bool _ | rec _ => True
   | pair v1 v2 => val v1 /\ val v2
   | inj1 v | inj2 v => val v
   | _ => False
@@ -51,16 +50,15 @@ Fixpoint val (e : expr) : Prop :=
 
 (** TYPES *)
 Inductive type :=
-  | Unit
+  | TUnit
   | TNat
-  | Bool
-  | Prod (t1 t2 : type)
-  | Sum (t1 t2 : type)
-  | Fun (t1 t2 : type)
+  | TBool
+  | TProd (t1 t2 : type)
+  | TSum (t1 t2 : type)
+  | TFun (t1 t2 : type)
 .
 
 (* TYPING *)
-(* Maybe this is a bit more 'clean', since it can be changed out if we decide to use a different id type *)
 Module TypeEnv.
 Definition type_env := list type.
 
@@ -72,7 +70,7 @@ Definition add : type -> type_env -> type_env := cons.
 End TypeEnv.
 
 Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
-  | T_unit : typed Gamma unit Unit
+  | T_unit : typed Gamma unit TUnit
   | T_Var (x : id) (t : type) :
       TypeEnv.lookup Gamma x = Some t ->
       typed Gamma (Var x) t
@@ -105,10 +103,9 @@ Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
       typed Gamma (eq e1 e2) TNat
 
   (* booleans*)
-  | T_true : typed Gamma true Bool
-  | T_false : typed Gamma false Bool
+  | T_bool (b : bool) : typed Gamma (Bool b) TBool
   | T_if (e1 e2 e3 : expr) (t : type) : 
-      typed Gamma e1 Bool ->
+      typed Gamma e1 TBool ->
       typed Gamma e2 t ->
       typed Gamma e3 t ->
       typed Gamma (ifthenelse e1 e2 e3) t
@@ -117,35 +114,48 @@ Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
   | T_pair (e1 e2 : expr) (t1 t2 : type) :
       typed Gamma e1 t1 ->
       typed Gamma e2 t2 ->
-      typed Gamma (pair e1 e2) (Prod t1 t2)
+      typed Gamma (pair e1 e2) (TProd t1 t2)
   | T_fst (e : expr) (t1 t2 : type) :
-      typed Gamma e (Prod t1 t2) ->
+      typed Gamma e (TProd t1 t2) ->
       typed Gamma (fst e) t1
   | T_snd (e : expr) (t1 t2 : type) :
-      typed Gamma e (Prod t1 t2) ->
+      typed Gamma e (TProd t1 t2) ->
       typed Gamma (snd e) t2
 
   (* sums *)
   | T_inj1 (e : expr) (t1 t2 : type) :
       typed Gamma e t1 ->
-      typed Gamma (inj1 e) (Sum t1 t2)
+      typed Gamma (inj1 e) (TSum t1 t2)
   | T_inj2 (e : expr) (t1 t2 : type) :
       typed Gamma e t2 ->
-      typed Gamma (inj2 e) (Sum t1 t2)
-  | T_match (e1 e2 e3 : expr) (t1 t2 t :type) :
-      typed Gamma e1 (Sum t1 t2) ->
+      typed Gamma (inj2 e) (TSum t1 t2)
+  | T_match (e1 e2 e3 : expr) (t1 t2 t : type) :
+      typed Gamma e1 (TSum t1 t2) ->
       typed (TypeEnv.add t1 Gamma) e2 t ->
       typed (TypeEnv.add t2 Gamma) e3 t ->
       typed Gamma (matchwith e1 e2 e3) t
 
   (* recursive functions *)
-  (* | T_rec TODO
-  | T_app TODO *)
+  | T_rec (e : expr) (t1 t2 : type) :
+      typed (TypeEnv.add (TFun t1 t2) (TypeEnv.add t1 Gamma)) e t2 ->
+      typed Gamma (rec e) (TFun t1 t2)
+  | T_app (e1 e2 : expr) (t1 t2 : type) :
+      typed Gamma e1 (TFun t1 t2) ->
+      typed Gamma e2 t1 ->
+      typed Gamma (app e1 e2) t2
 .
 
 Example two_plus_two_TNat : typed TypeEnv.empty (add (Nat 2) (Nat 2)) TNat.
 Proof.
   apply T_add.
+  - apply T_nat.
+  - apply T_nat.
+Qed.
+
+Example iftruethen3else5 : typed TypeEnv.empty (ifthenelse (Bool true) (Nat 3) (Nat 5)) TNat.
+Proof.
+  apply T_if.
+  - apply T_bool.
   - apply T_nat.
   - apply T_nat.
 Qed.
