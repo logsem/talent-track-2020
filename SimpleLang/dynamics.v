@@ -194,4 +194,11 @@ Inductive eval : expr -> expr -> Prop :=
 
 Example two_plus_two_four : eval (add (Nat 2) (Nat 2)) (Nat 4).
 Proof.
-  
+  apply E_add.
+Qed.
+
+Definition fac := rec ( ifthenelse (eq (Var 1) (Nat 0)) (Nat 1) (mul (Var 1) (app (Var 0) (sub (Var 1) (Nat 1)))) ).
+Example fac_five_120 : eval (app fac (Nat 5)) (Nat 120).
+Proof.
+  (* Help! *)
+Admitted.
