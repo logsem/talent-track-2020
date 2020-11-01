@@ -166,8 +166,10 @@ Inductive eval : expr -> expr -> Prop :=
 
   (* sums *)
   | E_inj1 e e' :
+      eval e e' ->
       eval (inj1 e) (inj1 e')
   | E_inj2 e e' :
+      eval e e' ->
       eval (inj2 e) (inj2 e')
   | E_match e1 e2 e3 e1' :
       eval e1 e1' ->
