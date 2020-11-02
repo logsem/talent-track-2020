@@ -1,6 +1,9 @@
-From SimpleLang Require Export statics.
-
 Require Import Coq.Arith.PeanoNat.
+Require Import Coq.Lists.List.
+Import ListNotations.
+Import Nat.
+
+From SimpleLang Require Export statics.
 
 (* SUBSTITUTION *)
 (** helper function: shift *)
@@ -20,7 +23,7 @@ match e with
   
   (* booleans *)
   | Bool b => Bool b
-  | ifthenelse e1 e2 e3 => ifthenelse (shift i j e1) (shift i j e2) (shift i j e2)
+  | ifthenelse e1 e2 e3 => ifthenelse (shift i j e1) (shift i j e2) (shift i j e3)
   
   (* products *)
   | pair e1 e2 => pair (shift i j e1) (shift i j e2)
@@ -72,6 +75,36 @@ Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
   | app e1 e2 => app (subst e1 i s) (subst e2 i s)
   end
 .
+
+
+Lemma shift_0 : forall (i : nat) (e : expr),
+  shift i 0 e = e.
+Proof.
+  intros. generalize i as i'. induction e; intros i'; simpl;
+  try rewrite IHe; try rewrite IHe1; try rewrite IHe2; try rewrite IHe3;
+  try reflexivity.
+  - (* Var *) destruct (x <? i').
+    + reflexivity.
+    + rewrite add_comm. reflexivity.
+Qed.
+
+Lemma shift_lemma : forall (Gamma1 Gamma2 Delta : TypeEnv.type_env) (t : type) (e : expr),
+  typed (Gamma1 ++ Gamma2) e t ->
+  typed (Gamma1 ++ Delta ++ Gamma2) (shift (length Gamma1) (length Delta) e) t.
+Proof.
+  intros. induction Delta.
+  - simpl. rewrite shift_0.
+    apply H.
+  - simpl. 
+Admitted.
+
+Lemma subst_lemma : forall (Gamma1 Gamma2 : TypeEnv.type_env) (t t' : type) (e e' : expr),
+  typed (Gamma1 ++ t' :: Gamma2) e t ->
+  typed (Gamma1 ++ Gamma2) e' t' ->
+  typed (Gamma1 ++ Gamma2) (subst e (length Gamma1) e') t.
+Proof.
+
+Admitted.
 
 
 (* OPERATIONAL SEMANTICS *)
