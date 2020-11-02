@@ -3,7 +3,8 @@ From SimpleLang Require Export statics.
 Require Import Coq.Arith.PeanoNat.
 
 (* SUBSTITUTION *)
-(** helper function: shift *)
+(** helper function: shift 
+    in for all variables in e with index under i, add j to i *)
 Fixpoint shift (i j : nat) (e : expr) : expr :=
 match e with
   | unit => unit
@@ -77,6 +78,7 @@ Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
 (* OPERATIONAL SEMANTICS *)
 Inductive eval : expr -> expr -> Prop :=
   (* numbers *)
+  (** add **)
   | E_add1 e1 e2 e1' :
       eval e1 e1' ->
       eval (add e1 e2) (add e1' e2)
@@ -86,6 +88,7 @@ Inductive eval : expr -> expr -> Prop :=
       eval (add v1 e2) (add v1 e2')
   | E_add n1 n2 :
       eval (add (Nat n1) (Nat n2)) (Nat (n1 + n2))
+  (** sub **)
   | E_sub1 e1 e2 e1' :
       eval e1 e1' ->
       eval (sub e1 e2) (sub e1' e2)
@@ -95,6 +98,7 @@ Inductive eval : expr -> expr -> Prop :=
       eval (sub v1 e2) (sub v1 e2')
   | E_sub n1 n2 :
       eval (sub (Nat n1) (Nat n2)) (Nat (n1 - n2))
+  (** mul **) 
   | E_mul1 e1 e2 e1' :
       eval e1 e1' ->
       eval (mul e1 e2) (mul e1' e2)
@@ -104,6 +108,7 @@ Inductive eval : expr -> expr -> Prop :=
       eval (mul v1 e2) (mul v1 e2')
   | E_mul n1 n2 :
       eval (mul (Nat n1) (Nat n2)) (Nat (n1 * n2))
+  (** le **)
   | E_le1 e1 e2 e1' :
       eval e1 e1' ->
       eval (le e1 e2) (le e1' e2)
@@ -113,6 +118,7 @@ Inductive eval : expr -> expr -> Prop :=
       eval (le v1 e2) (le v1 e2')
   | E_le n1 n2 :
       eval (le (Nat n1) (Nat n2)) (Bool (n1 <=? n2))
+  (** lt **)
   | E_lt1 e1 e2 e1' :
       eval e1 e1' ->
       eval (lt e1 e2) (lt e1' e2)
@@ -122,6 +128,7 @@ Inductive eval : expr -> expr -> Prop :=
       eval (lt v1 e2) (lt v1 e2')
   | E_lt n1 n2 :
       eval (lt (Nat n1) (Nat n2)) (Bool (n1 <? n2))
+  (** eq **)
   | E_eq1 e1 e2 e1' :
       eval e1 e1' ->
       eval (eq e1 e2) (eq e1' e2)
@@ -149,6 +156,7 @@ Inductive eval : expr -> expr -> Prop :=
       val v1 ->
       eval e2 e2' ->
       eval (pair v1 e2) (pair v1 e2')
+  (** fst **)
   | E_fst1 e1 e1' :
       eval e1 e1' ->
       eval (fst e1) (fst e1')
@@ -156,6 +164,7 @@ Inductive eval : expr -> expr -> Prop :=
       val v1 ->
       val v2 ->
       eval (fst (pair v1 v2)) v1
+  (** snd **)
   | E_snd1 e1 e1' :
       eval e1 e1' ->
       eval (snd e1) (snd e1')
@@ -171,6 +180,7 @@ Inductive eval : expr -> expr -> Prop :=
   | E_inj2 e e' :
       eval e e' ->
       eval (inj2 e) (inj2 e')
+  (** match **)
   | E_match e1 e2 e3 e1' :
       eval e1 e1' ->
       eval (matchwith e1 e2 e3) (matchwith e1' e2 e3)
@@ -191,7 +201,8 @@ Inductive eval : expr -> expr -> Prop :=
       eval (app v1 e2) (app v1 e2')
   | E_app e v :
       val v ->
-      eval (app (rec e) v) (subst (subst e 0 (rec e)) 1 v) (* Was 0 the fuction or the param? *)       
+      eval (app (rec e) v) (subst (subst e 0 (rec e)) 1 v) (* FIXME Lasse: Was 0 the fuction or the param? *)
+                                                           (* FIXME Stinna: I'm unsure about the evaluated expression, (subst ...) *)
 .
 
 Example two_plus_two_four : eval (add (Nat 2) (Nat 2)) (Nat 4).
@@ -199,8 +210,21 @@ Proof.
   apply E_add.
 Qed.
 
+Example two_minus_one_plus_three : eval (add (sub (Nat 2) (Nat 1)) (Nat 3)) (add (Nat 1) (Nat 3)).
+Proof.
+  apply E_add1. (** e1 --> e1' implies e1 + e2 --> e1' + e2 by add1
+                    Which means if we can prove  e1 --> e1', we are done, so we apply add1. **)
+  apply E_sub.  (** and e1 --> e1' is true by sub **)
+Qed.
+
 Definition fac := rec ( ifthenelse (eq (Var 1) (Nat 0)) (Nat 1) (mul (Var 1) (app (Var 0) (sub (Var 1) (Nat 1)))) ).
 Example fac_five_120 : eval (app fac (Nat 5)) (Nat 120).
 Proof.
-  (* Help! *)
+  (* FIXME Lasse: Help! *)
+  (* FIXME Stinna: also help! Is fac_five_120 not of the form in E_app?
+                   i.e. fac is (rec f(x) := e) and (Nat 5) is a value v *)
 Admitted.
+
+
+
+
