@@ -1,7 +1,6 @@
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 Import ListNotations.
-Import Nat.
 
 From SimpleLang Require Export statics.
 
@@ -34,10 +33,10 @@ match e with
   (* sums *)
   | inj1 e1 => inj1 (shift i j e1)
   | inj2 e1 => inj2 (shift i j e1)
-  | matchwith e1 e2 e3 => matchwith (shift i j e1) (shift (i+1) j e2) (shift (i+1) j e3)
+  | matchwith e1 e2 e3 => matchwith (shift i j e1) (shift (S i) j e2) (shift (S i) j e3)
 
   (* recursive functions *)
-  | rec e1 => rec (shift (i+2) j e1)
+  | rec e1 => rec (shift (S (S i)) j e1)
   | app e1 e2 => app (shift i j e1) (shift i j e2)
 end
 .
@@ -59,7 +58,8 @@ Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
 
   (* booleans *)
   | Bool b => Bool b
-  | ifthenelse e1 e2 e3 => ifthenelse (subst e1 i s) (subst e2 i s) (subst e3 i s)
+  | ifthenelse e1 e2 e3 =>
+    ifthenelse (subst e1 i s) (subst e2 i s) (subst e3 i s)
 
   (* products *)
   | pair e1 e2 => pair (subst e1 i s) (subst e2 i s)
@@ -69,7 +69,10 @@ Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
   (* sums *)
   | inj1 e1 => inj1 (subst e1 i s)
   | inj2 e1 => inj2 (subst e1 i s)
-  | matchwith e1 e2 e3 => matchwith (subst e1 i s) (subst e2 (i+1) (shift 0 1 s)) (subst e3 (i+1) (shift 0 1 s))
+  | matchwith e1 e2 e3 =>
+    matchwith
+      (subst e1 i s)
+      (subst e2 (i+1) (shift 0 1 s)) (subst e3 (i+1) (shift 0 1 s))
 
   (* recursive functions *)
   | rec e1 => rec (subst e1 (i+2) (shift 0 2 s))
@@ -86,13 +89,45 @@ Proof.
   try reflexivity.
   - (* Var *) destruct (x <? i').
     + reflexivity.
-    + rewrite add_comm. reflexivity.
+    + rewrite Nat.add_comm. reflexivity.
 Qed.
 
 Lemma shift_lemma : forall (Gamma1 Gamma2 Delta : TypeEnv.type_env) (t : type) (e : expr),
   typed (Gamma1 ++ Gamma2) e t ->
   typed (Gamma1 ++ Delta ++ Gamma2) (shift (length Gamma1) (length Delta) e) t.
 Proof.
+  intros Γ1 Γ2 Δ t e Het.
+  remember (Γ1 ++ Γ2) as Ξ.
+  revert Γ1 Γ2 HeqΞ.
+  induction Het; simpl; intros Γ1 Γ2 HeqΞ.
+  - constructor.
+  - simpl. admit.
+  - simpl. constructor.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; econstructor; eauto.
+  - simpl; econstructor; eauto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; econstructor.
+    + apply IHHet1; trivial.
+    + apply (IHHet2 (t1 :: Γ1)).
+      rewrite HeqΞ; reflexivity.
+    + apply (IHHet3 (t2 :: Γ1)).
+      rewrite HeqΞ; reflexivity.
+  - constructor.
+    apply (IHHet (_ :: _ :: _)).
+    rewrite HeqΞ; reflexivity.
+  - econstructor; eauto.
+Admitted.
+
   intros. induction Delta.
   - simpl. rewrite shift_0.
     apply H.
