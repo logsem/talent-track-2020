@@ -92,9 +92,9 @@ Proof.
     + rewrite Nat.add_comm. reflexivity.
 Qed.
 
-Lemma shift_lemma : forall (Gamma1 Gamma2 Delta : TypeEnv.type_env) (t : type) (e : expr),
-  typed (Gamma1 ++ Gamma2) e t ->
-  typed (Gamma1 ++ Delta ++ Gamma2) (shift (length Gamma1) (length Delta) e) t.
+Lemma shift_lemma : forall (Γ1 Γ2 Δ : TypeEnv.type_env) (t : type) (e : expr),
+  typed (Γ1 ++ Γ2) e t ->
+  typed (Γ1 ++ Δ ++ Γ2) (shift (length Γ1) (length Δ) e) t.
 Proof.
   intros Γ1 Γ2 Δ t e Het.
   remember (Γ1 ++ Γ2) as Ξ.
@@ -148,10 +148,10 @@ Proof.
   - econstructor; eauto.
 Qed.
 
-Lemma subst_lemma : forall (Gamma1 Gamma2 : TypeEnv.type_env) (t t' : type) (e e' : expr),
-  typed (Gamma1 ++ t' :: Gamma2) e t ->
-  typed (Gamma1 ++ Gamma2) e' t' ->
-  typed (Gamma1 ++ Gamma2) (subst e (length Gamma1) e') t.
+Lemma subst_lemma : forall (Γ1 Γ2 : TypeEnv.type_env) (t t' : type) (e e' : expr),
+  typed (Γ1 ++ t' :: Γ2) e t ->
+  typed (Γ1 ++ Γ2) e' t' ->
+  typed (Γ1 ++ Γ2) (subst e (length Γ1) e') t.
 Proof.
 
 Admitted.
