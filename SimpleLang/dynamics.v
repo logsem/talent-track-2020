@@ -101,7 +101,27 @@ Proof.
   revert Γ1 Γ2 HeqΞ.
   induction Het; simpl; intros Γ1 Γ2 HeqΞ.
   - constructor.
-  - simpl. admit.
+  - simpl. destruct (x <? length Γ1) eqn:Hx; rewrite HeqΞ in H;
+    constructor; unfold TypeEnv.lookup in *.
+    + replace (nth_error (Γ1 ++ Δ ++ Γ2) x) with (nth_error Γ1 x).
+      * rewrite <- H. replace (nth_error (Γ1 ++ Γ2) x) with (nth_error Γ1 x).
+        -- reflexivity.
+        -- symmetry. apply nth_error_app1. apply Nat.ltb_lt.
+           apply Hx.
+      * symmetry. apply nth_error_app1. apply Nat.ltb_lt.
+        apply Hx.
+    + replace (nth_error (Γ1 ++ Δ ++ Γ2) (x + length Δ)) with (nth_error (Δ ++ Γ2) (x + length Δ - length Γ1));
+      apply Nat.ltb_ge in Hx.
+      * rewrite <- H. replace (nth_error (Γ1 ++ Γ2) x) with (nth_error Γ2 (x - length Γ1)).
+        -- replace (nth_error (Δ ++ Γ2) (x + length Δ - length Γ1)) with (nth_error (Γ2) (x + length Δ - length Γ1 - length Δ)).
+           ++ rewrite <- Nat.sub_add_distr. rewrite Nat.add_comm with (n:=(length Γ1)).
+              rewrite Nat.sub_add_distr. rewrite Nat.add_sub.
+              reflexivity. (* How can this be done more easily? *)
+           ++ symmetry. apply nth_error_app2. apply Nat.le_add_le_sub_l.
+              apply Nat.add_le_mono_r. apply Hx.
+        -- symmetry. apply nth_error_app2. apply Hx.
+      * symmetry. apply nth_error_app2.
+        apply Plus.le_plus_trans. apply Hx.
   - simpl. constructor.
   - simpl; constructor; auto.
   - simpl; constructor; auto.
@@ -126,13 +146,7 @@ Proof.
     apply (IHHet (_ :: _ :: _)).
     rewrite HeqΞ; reflexivity.
   - econstructor; eauto.
-Admitted.
-
-  intros. induction Delta.
-  - simpl. rewrite shift_0.
-    apply H.
-  - simpl. 
-Admitted.
+Qed.
 
 Lemma subst_lemma : forall (Gamma1 Gamma2 : TypeEnv.type_env) (t t' : type) (e e' : expr),
   typed (Gamma1 ++ t' :: Gamma2) e t ->
