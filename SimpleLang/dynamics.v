@@ -176,9 +176,8 @@ Proof.
   - simpl; econstructor.
     + eauto.
     + unfold TypeEnv.add. rewrite app_comm_cons. simpl.
-      apply (IHHet2 (t1 :: Γ1) Γ2). 
-      
-
+      admit.
+    + admit.
 Admitted.
 
 
@@ -187,129 +186,128 @@ Inductive step : expr -> expr -> Prop :=
   (* numbers *)
   (** add **)
   | E_add1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (add e1 e2) (add e1' e2)
+      step e1 e1' ->
+      step (add e1 e2) (add e1' e2)
   | E_add2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (add v1 e2) (add v1 e2')
+      step e2 e2' ->
+      step (add v1 e2) (add v1 e2')
   | E_add n1 n2 :
-      eval (add (Nat n1) (Nat n2)) (Nat (n1 + n2))
+      step (add (Nat n1) (Nat n2)) (Nat (n1 + n2))
   (** sub **)
   | E_sub1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (sub e1 e2) (sub e1' e2)
+      step e1 e1' ->
+      step (sub e1 e2) (sub e1' e2)
   | E_sub2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (sub v1 e2) (sub v1 e2')
+      step e2 e2' ->
+      step (sub v1 e2) (sub v1 e2')
   | E_sub n1 n2 :
-      eval (sub (Nat n1) (Nat n2)) (Nat (n1 - n2))
+      step (sub (Nat n1) (Nat n2)) (Nat (n1 - n2))
   (** mul **) 
   | E_mul1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (mul e1 e2) (mul e1' e2)
+      step e1 e1' ->
+      step (mul e1 e2) (mul e1' e2)
   | E_mul2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (mul v1 e2) (mul v1 e2')
+      step e2 e2' ->
+      step (mul v1 e2) (mul v1 e2')
   | E_mul n1 n2 :
-      eval (mul (Nat n1) (Nat n2)) (Nat (n1 * n2))
+      step (mul (Nat n1) (Nat n2)) (Nat (n1 * n2))
   (** le **)
   | E_le1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (le e1 e2) (le e1' e2)
+      step e1 e1' ->
+      step (le e1 e2) (le e1' e2)
   | E_le2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (le v1 e2) (le v1 e2')
+      step e2 e2' ->
+      step (le v1 e2) (le v1 e2')
   | E_le n1 n2 :
-      eval (le (Nat n1) (Nat n2)) (Bool (n1 <=? n2))
+      step (le (Nat n1) (Nat n2)) (Bool (n1 <=? n2))
   (** lt **)
   | E_lt1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (lt e1 e2) (lt e1' e2)
+      step e1 e1' ->
+      step (lt e1 e2) (lt e1' e2)
   | E_lt2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (lt v1 e2) (lt v1 e2')
+      step e2 e2' ->
+      step (lt v1 e2) (lt v1 e2')
   | E_lt n1 n2 :
-      eval (lt (Nat n1) (Nat n2)) (Bool (n1 <? n2))
+      step (lt (Nat n1) (Nat n2)) (Bool (n1 <? n2))
   (** eq **)
   | E_eq1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (eq e1 e2) (eq e1' e2)
+      step e1 e1' ->
+      step (eq e1 e2) (eq e1' e2)
   | E_eq2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (eq v1 e2) (eq v1 e2')
+      step e2 e2' ->
+      step (eq v1 e2) (eq v1 e2')
   | E_eq n1 n2 :
-      eval (eq (Nat n1) (Nat n2)) (Bool (n1 =? n2))
+      step (eq (Nat n1) (Nat n2)) (Bool (n1 =? n2))
 
   (* booleans *)
   | E_if e1 e2 e3 e1' :
-      eval e1 e1' ->
-      eval (ifthenelse e1 e2 e3) (ifthenelse e1' e2 e3)
+      step e1 e1' ->
+      step (ifthenelse e1 e2 e3) (ifthenelse e1' e2 e3)
   | E_if_true e2 e3 :
-      eval (ifthenelse (Bool true) e2 e3) e2
+      step (ifthenelse (Bool true) e2 e3) e2
   | E_if_false e2 e3 :
-      eval (ifthenelse (Bool false) e2 e3) e3
+      step (ifthenelse (Bool false) e2 e3) e3
   
   (* products *)
   | E_pair1 e1 e2 e1' :
-      eval e1 e1' ->
-      eval (pair e1 e2) (pair e1' e2)
+      step e1 e1' ->
+      step (pair e1 e2) (pair e1' e2)
   | E_pair2 v1 e2 e2' :
       val v1 ->
-      eval e2 e2' ->
-      eval (pair v1 e2) (pair v1 e2')
+      step e2 e2' ->
+      step (pair v1 e2) (pair v1 e2')
   (** fst **)
   | E_fst1 e1 e1' :
-      eval e1 e1' ->
-      eval (fst e1) (fst e1')
+      step e1 e1' ->
+      step (fst e1) (fst e1')
   | E_fst v1 v2 :
       val v1 ->
       val v2 ->
-      eval (fst (pair v1 v2)) v1
+      step (fst (pair v1 v2)) v1
   (** snd **)
   | E_snd1 e1 e1' :
-      eval e1 e1' ->
-      eval (snd e1) (snd e1')
+      step e1 e1' ->
+      step (snd e1) (snd e1')
   | E_snd v1 v2 :
       val v1 ->
       val v2 ->
-      eval (snd (pair v1 v2)) v2
+      step (snd (pair v1 v2)) v2
 
   (* sums *)
   | E_inj1 e e' :
-      eval e e' ->
-      eval (inj1 e) (inj1 e')
+      step e e' ->
+      step (inj1 e) (inj1 e')
   | E_inj2 e e' :
-      eval e e' ->
-      eval (inj2 e) (inj2 e')
+      step e e' ->
+      step (inj2 e) (inj2 e')
   (** match **)
   | E_match e1 e2 e3 e1' :
-      eval e1 e1' ->
-      eval (matchwith e1 e2 e3) (matchwith e1' e2 e3)
+      step e1 e1' ->
+      step (matchwith e1 e2 e3) (matchwith e1' e2 e3)
   | E_match_inj1 v e2 e3 :
       val v ->
-      eval (matchwith (inj1 v) e2 e3) (subst e2 0 v)
+      step (matchwith (inj1 v) e2 e3) (subst e2 0 v)
   | E_match_inj2 v e2 e3 :
       val v ->
-      eval (matchwith (inj2 v) e2 e3) (subst e3 0 v)
+      step (matchwith (inj2 v) e2 e3) (subst e3 0 v)
 
   (* recursive_functions *)
   | E_app1 e1 e2 e1':
-      eval e1 e1' ->
-      eval (app e1 e2) (app e1' e2)
+      step e1 e1' ->
+      step (app e1 e2) (app e1' e2)
   | E_app2 v1 e2 e2':
       val v1 ->
-      eval e2 e2' ->
-      eval (app v1 e2) (app v1 e2')
+      step e2 e2' ->
+      step (app v1 e2) (app v1 e2')
   | E_app e v :
       val v ->
-      eval (app (rec e) v) (subst (subst e 0 (rec e)) 1 v) (* FIXME Lasse: Was 0 the fuction or the param? *)
-                                                           (* FIXME Stinna: I'm unsure about the evaluated expression, (subst ...) *)
+      step (app (rec e) v) (subst (subst e 0 (rec e)) 1 v)
 .
 
 Example two_plus_two_four : step (add (Nat 2) (Nat 2)) (Nat 4).
