@@ -69,80 +69,80 @@ Definition lookup : type_env -> id -> option type := @nth_error type.
 Definition add : type -> type_env -> type_env := cons.
 End TypeEnv.
 
-Inductive typed (Gamma : TypeEnv.type_env) : expr -> type -> Prop :=
-  | T_unit : typed Gamma unit TUnit
+Inductive typed (Γ : TypeEnv.type_env) : expr -> type -> Prop :=
+  | T_unit : typed Γ unit TUnit
   | T_Var (x : id) (t : type) :
-      TypeEnv.lookup Gamma x = Some t ->
-      typed Gamma (Var x) t
+      TypeEnv.lookup Γ x = Some t ->
+      typed Γ (Var x) t
 
   (* numbers *)
-  | T_nat (n : nat) : typed Gamma (Nat n) TNat
+  | T_nat (n : nat) : typed Γ (Nat n) TNat
   | T_add (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-      typed Gamma (add e1 e2) TNat
+      typed Γ e1 TNat ->
+      typed Γ e2 TNat ->
+      typed Γ (add e1 e2) TNat
   | T_sub (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-      typed Gamma (sub e1 e2) TNat
+      typed Γ e1 TNat ->
+      typed Γ e2 TNat ->
+      typed Γ (sub e1 e2) TNat
   | T_mul (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-      typed Gamma (mul e1 e2) TNat
+      typed Γ e1 TNat ->
+      typed Γ e2 TNat ->
+      typed Γ (mul e1 e2) TNat
   | T_le (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-      typed Gamma (le e1 e2) TNat
+      typed Γ e1 TNat ->
+      typed Γ e2 TNat ->
+      typed Γ (le e1 e2) TNat
   | T_lt (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-      typed Gamma (lt e1 e2) TNat
+      typed Γ e1 TNat ->
+      typed Γ e2 TNat ->
+      typed Γ (lt e1 e2) TNat
   | T_eq (e1 e2 : expr) : 
-      typed Gamma e1 TNat ->
-      typed Gamma e2 TNat ->
-      typed Gamma (eq e1 e2) TNat
+      typed Γ e1 TNat ->
+      typed Γ e2 TNat ->
+      typed Γ (eq e1 e2) TNat
 
   (* booleans*)
-  | T_bool (b : bool) : typed Gamma (Bool b) TBool
+  | T_bool (b : bool) : typed Γ (Bool b) TBool
   | T_if (e1 e2 e3 : expr) (t : type) : 
-      typed Gamma e1 TBool ->
-      typed Gamma e2 t ->
-      typed Gamma e3 t ->
-      typed Gamma (ifthenelse e1 e2 e3) t
+      typed Γ e1 TBool ->
+      typed Γ e2 t ->
+      typed Γ e3 t ->
+      typed Γ (ifthenelse e1 e2 e3) t
 
   (* products *)
   | T_pair (e1 e2 : expr) (t1 t2 : type) :
-      typed Gamma e1 t1 ->
-      typed Gamma e2 t2 ->
-      typed Gamma (pair e1 e2) (TProd t1 t2)
+      typed Γ e1 t1 ->
+      typed Γ e2 t2 ->
+      typed Γ (pair e1 e2) (TProd t1 t2)
   | T_fst (e : expr) (t1 t2 : type) :
-      typed Gamma e (TProd t1 t2) ->
-      typed Gamma (fst e) t1
+      typed Γ e (TProd t1 t2) ->
+      typed Γ (fst e) t1
   | T_snd (e : expr) (t1 t2 : type) :
-      typed Gamma e (TProd t1 t2) ->
-      typed Gamma (snd e) t2
+      typed Γ e (TProd t1 t2) ->
+      typed Γ (snd e) t2
 
   (* sums *)
   | T_inj1 (e : expr) (t1 t2 : type) :
-      typed Gamma e t1 ->
-      typed Gamma (inj1 e) (TSum t1 t2)
+      typed Γ e t1 ->
+      typed Γ (inj1 e) (TSum t1 t2)
   | T_inj2 (e : expr) (t1 t2 : type) :
-      typed Gamma e t2 ->
-      typed Gamma (inj2 e) (TSum t1 t2)
+      typed Γ e t2 ->
+      typed Γ (inj2 e) (TSum t1 t2)
   | T_match (e1 e2 e3 : expr) (t1 t2 t : type) :
-      typed Gamma e1 (TSum t1 t2) ->
-      typed (TypeEnv.add t1 Gamma) e2 t ->
-      typed (TypeEnv.add t2 Gamma) e3 t ->
-      typed Gamma (matchwith e1 e2 e3) t
+      typed Γ e1 (TSum t1 t2) ->
+      typed (TypeEnv.add t1 Γ) e2 t ->
+      typed (TypeEnv.add t2 Γ) e3 t ->
+      typed Γ (matchwith e1 e2 e3) t
 
   (* recursive functions *)
   | T_rec (e : expr) (t1 t2 : type) :
-      typed (TypeEnv.add (TFun t1 t2) (TypeEnv.add t1 Gamma)) e t2 ->
-      typed Gamma (rec e) (TFun t1 t2)
+      typed (TypeEnv.add (TFun t1 t2) (TypeEnv.add t1 Γ)) e t2 ->
+      typed Γ (rec e) (TFun t1 t2)
   | T_app (e1 e2 : expr) (t1 t2 : type) :
-      typed Gamma e1 (TFun t1 t2) ->
-      typed Gamma e2 t1 ->
-      typed Gamma (app e1 e2) t2
+      typed Γ e1 (TFun t1 t2) ->
+      typed Γ e2 t1 ->
+      typed Γ (app e1 e2) t2
 .
 
 Example two_plus_two_TNat : typed TypeEnv.empty (add (Nat 2) (Nat 2)) TNat.

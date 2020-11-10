@@ -72,10 +72,10 @@ Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
   | matchwith e1 e2 e3 =>
     matchwith
       (subst e1 i s)
-      (subst e2 (i+1) (shift 0 1 s)) (subst e3 (i+1) (shift 0 1 s))
+      (subst e2 (S i) (shift 0 1 s)) (subst e3 (S i) (shift 0 1 s))
 
   (* recursive functions *)
-  | rec e1 => rec (subst e1 (i+2) (shift 0 2 s))
+  | rec e1 => rec (subst e1 (S (S i)) (shift 0 2 s))
   | app e1 e2 => app (subst e1 i s) (subst e2 i s)
   end
 .
@@ -122,7 +122,7 @@ Proof.
         -- symmetry. apply nth_error_app2. apply Hx.
       * symmetry. apply nth_error_app2.
         apply Plus.le_plus_trans. apply Hx.
-  - simpl. constructor.
+  - simpl; constructor.
   - simpl; constructor; auto.
   - simpl; constructor; auto.
   - simpl; constructor; auto.
@@ -153,6 +153,31 @@ Lemma subst_lemma : forall (Γ1 Γ2 : TypeEnv.type_env) (t t' : type) (e e' : ex
   typed (Γ1 ++ Γ2) e' t' ->
   typed (Γ1 ++ Γ2) (subst e (length Γ1) e') t.
 Proof.
+  intros Γ1 Γ2 t t' e e' Het.
+  remember (Γ1 ++ t' :: Γ2) as Ξ. (* remember (Γ1 ++ Γ2) as Ξ. remember (Γ1 ++ t' :: Γ2) as Ξ'.*)
+  revert Γ1 Γ2 HeqΞ. (* HeqΞ'. *)
+  induction Het; intros Γ1 Γ2 HeqΞ He't'.
+  - simpl; constructor.
+  - admit.
+  - simpl; constructor.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; constructor; auto.
+  - simpl; econstructor; eauto.
+  - simpl; econstructor; eauto.
+  - simpl; econstructor; eauto.
+  - simpl; constructor; auto.
+  - simpl; econstructor.
+    + eauto.
+    + unfold TypeEnv.add. rewrite app_comm_cons. simpl.
+      apply (IHHet2 (t1 :: Γ1) Γ2). 
+      
 
 Admitted.
 
