@@ -183,7 +183,7 @@ Admitted.
 
 
 (* OPERATIONAL SEMANTICS *)
-Inductive eval : expr -> expr -> Prop :=
+Inductive step : expr -> expr -> Prop :=
   (* numbers *)
   (** add **)
   | E_add1 e1 e2 e1' :
@@ -312,26 +312,16 @@ Inductive eval : expr -> expr -> Prop :=
                                                            (* FIXME Stinna: I'm unsure about the evaluated expression, (subst ...) *)
 .
 
-Example two_plus_two_four : eval (add (Nat 2) (Nat 2)) (Nat 4).
+Example two_plus_two_four : step (add (Nat 2) (Nat 2)) (Nat 4).
 Proof.
   apply E_add.
 Qed.
 
-Example two_minus_one_plus_three : eval (add (sub (Nat 2) (Nat 1)) (Nat 3)) (add (Nat 1) (Nat 3)).
+Example two_minus_one_plus_three : step (add (sub (Nat 2) (Nat 1)) (Nat 3)) (add (Nat 1) (Nat 3)).
 Proof.
   apply E_add1. (** e1 --> e1' implies e1 + e2 --> e1' + e2 by add1
                     Which means if we can prove  e1 --> e1', we are done, so we apply add1. **)
   apply E_sub.  (** and e1 --> e1' is true by sub **)
 Qed.
-
-Definition fac := rec ( ifthenelse (eq (Var 1) (Nat 0)) (Nat 1) (mul (Var 1) (app (Var 0) (sub (Var 1) (Nat 1)))) ).
-Example fac_five_120 : eval (app fac (Nat 5)) (Nat 120).
-Proof.
-  (* FIXME Lasse: Help! *)
-  (* FIXME Stinna: also help! Is fac_five_120 not of the form in E_app?
-                   i.e. fac is (rec f(x) := e) and (Nat 5) is a value v *)
-Admitted.
-
-
 
 
