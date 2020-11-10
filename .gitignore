@@ -9,3 +9,6 @@
 Makefile.coq
 Makefile.coq.conf
 *.vo
+*.vok
+*.vos
+.lia.cache

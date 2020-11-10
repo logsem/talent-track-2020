@@ -1,6 +1,7 @@
 Require Import Coq.Arith.PeanoNat.
 Require Import Coq.Lists.List.
 Import ListNotations.
+Require Import Coq.micromega.Lia.
 
 From SimpleLang Require Export statics.
 
@@ -99,29 +100,24 @@ Proof.
   intros Γ1 Γ2 Δ t e Het.
   remember (Γ1 ++ Γ2) as Ξ.
   revert Γ1 Γ2 HeqΞ.
-  induction Het; simpl; intros Γ1 Γ2 HeqΞ.
+  induction Het as [| ??? Hlu| | | | | | | | | | | | | | | | |];
+    simpl; intros Γ1 Γ2 HeqΞ.
   - constructor.
-  - simpl. destruct (x <? length Γ1) eqn:Hx; rewrite HeqΞ in H;
+  - simpl. destruct (x <? length Γ1) eqn:Hx; rewrite HeqΞ in Hlu;
     constructor; unfold TypeEnv.lookup in *.
-    + replace (nth_error (Γ1 ++ Δ ++ Γ2) x) with (nth_error Γ1 x).
-      * rewrite <- H. replace (nth_error (Γ1 ++ Γ2) x) with (nth_error Γ1 x).
-        -- reflexivity.
-        -- symmetry. apply nth_error_app1. apply Nat.ltb_lt.
-           apply Hx.
-      * symmetry. apply nth_error_app1. apply Nat.ltb_lt.
-        apply Hx.
-    + replace (nth_error (Γ1 ++ Δ ++ Γ2) (x + length Δ)) with (nth_error (Δ ++ Γ2) (x + length Δ - length Γ1));
-      apply Nat.ltb_ge in Hx.
-      * rewrite <- H. replace (nth_error (Γ1 ++ Γ2) x) with (nth_error Γ2 (x - length Γ1)).
-        -- replace (nth_error (Δ ++ Γ2) (x + length Δ - length Γ1)) with (nth_error (Γ2) (x + length Δ - length Γ1 - length Δ)).
-           ++ rewrite <- Nat.sub_add_distr. rewrite Nat.add_comm with (n:=(length Γ1)).
-              rewrite Nat.sub_add_distr. rewrite Nat.add_sub.
-              reflexivity. (* How can this be done more easily? *)
-           ++ symmetry. apply nth_error_app2. apply Nat.le_add_le_sub_l.
-              apply Nat.add_le_mono_r. apply Hx.
-        -- symmetry. apply nth_error_app2. apply Hx.
-      * symmetry. apply nth_error_app2.
-        apply Plus.le_plus_trans. apply Hx.
+    + apply Nat.ltb_lt in Hx.
+      rewrite nth_error_app1; [|trivial; fail].
+      rewrite nth_error_app1 in Hlu; trivial.
+    + apply Nat.ltb_ge in Hx.
+      rewrite nth_error_app2 in Hlu; [|trivial; fail].
+      rewrite app_assoc.
+      rewrite nth_error_app2.
+      * rewrite app_length, (Nat.add_comm (length Γ1)).
+        rewrite Nat.sub_add_distr.
+        rewrite <- Nat.add_sub_assoc; [|trivial; fail].
+        rewrite Nat.sub_diag, Nat.add_0_r; trivial.
+      * rewrite app_length.
+        apply Nat.add_le_mono; trivial.
   - simpl; constructor.
   - simpl; constructor; auto.
   - simpl; constructor; auto.
@@ -155,10 +151,41 @@ Lemma subst_lemma : forall (Γ1 Γ2 : TypeEnv.type_env) (t t' : type) (e e' : ex
 Proof.
   intros Γ1 Γ2 t t' e e' Het.
   remember (Γ1 ++ t' :: Γ2) as Ξ. (* remember (Γ1 ++ Γ2) as Ξ. remember (Γ1 ++ t' :: Γ2) as Ξ'.*)
-  revert Γ1 Γ2 HeqΞ. (* HeqΞ'. *)
-  induction Het; intros Γ1 Γ2 HeqΞ He't'.
+  revert Γ1 Γ2 HeqΞ e'. (* HeqΞ'. *)
+  induction Het as [| ??? Hlu| | | | | | | | | | | | | | | | |];
+    intros Γ1 Γ2 HeqΞ He't'.
   - simpl; constructor.
-  - admit.
+  - simpl.
+    destruct (length Γ1 =? x) eqn:Hx.
+    + rewrite HeqΞ in Hlu.
+      unfold TypeEnv.lookup in Hlu.
+      apply Nat.eqb_eq in Hx.
+      rewrite <- Hx in Hlu.
+      rewrite nth_error_app2 in Hlu; [|trivial; fail].
+      rewrite Nat.sub_diag in Hlu; simpl in *.
+      inversion Hlu; subst.
+      trivial.
+    + destruct (x <? length Γ1) eqn:Hx'.
+      * apply Nat.ltb_lt in Hx'.
+        constructor.
+        unfold TypeEnv.lookup.
+        unfold TypeEnv.lookup in Hlu.
+        rewrite HeqΞ in Hlu.
+        rewrite nth_error_app1; [|trivial; fail].
+        rewrite nth_error_app1 in Hlu; trivial.
+      * constructor.
+        apply Nat.ltb_ge in Hx'.
+        apply Nat.eqb_neq in Hx.
+        unfold TypeEnv.lookup.
+        unfold TypeEnv.lookup in Hlu.
+        rewrite HeqΞ in Hlu.
+        rewrite nth_error_app2.
+        -- rewrite <- Nat.sub_add_distr.
+           rewrite nth_error_app2 in Hlu; [|trivial; fail].
+           replace (x - length Γ1) with (S (x - (1 + length Γ1))) in Hlu;
+             [trivial; fail|].
+           lia.
+        -- lia.
   - simpl; constructor.
   - simpl; constructor; auto.
   - simpl; constructor; auto.
@@ -175,12 +202,21 @@ Proof.
   - simpl; constructor; auto.
   - simpl; econstructor.
     + eauto.
-    + unfold TypeEnv.add. rewrite app_comm_cons. simpl.
-      apply (IHHet2 (t1 :: Γ1) Γ2). 
-      
-
-Admitted.
-
+    + unfold TypeEnv.add.
+      apply (IHHet2 (_ :: _)).
+      * rewrite HeqΞ; trivial.
+      * apply (shift_lemma [] (_ ++ _) [_]); trivial.
+    + unfold TypeEnv.add.
+      apply (IHHet3 (_ :: _)).
+      * rewrite HeqΞ; trivial.
+      * apply (shift_lemma [] (_ ++ _) [_]); trivial.
+  - simpl; econstructor.
+    unfold TypeEnv.add.
+    apply (IHHet (_ :: _ :: _)).
+    + rewrite HeqΞ; trivial.
+    + apply (shift_lemma [] (_ ++ _) [_; _]); trivial.
+  - simpl; econstructor; eauto.
+Qed.
 
 (* OPERATIONAL SEMANTICS *)
 Inductive eval : expr -> expr -> Prop :=
