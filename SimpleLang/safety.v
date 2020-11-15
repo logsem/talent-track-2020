@@ -168,16 +168,32 @@ Proof.
       constructor; assumption.
 
   (* Case: T_fst *)
-  - admit.
+  - destruct IHtyped as [He1_val | He1_step].
+    (* e1 is a value *)
+    + (* needs canonical_forms_pair *)admit.
+    (* e1 takes a step *)
+    + admit.
 
   (* Case: T_snd *)
   - admit.
 
   (* Case: T_inj1 *)
-  - admit.
+  - destruct IHtyped as [He_val | He_step].
+    (* e is a value *)
+    + left. simpl. apply He_val.
+    (* e takes a step *)
+    + right. destruct He_step as [e''].
+      exists (inj1 e''). 
+      constructor; assumption.
 
   (* Case: T_inj2 *)
-  - admit.
+  - destruct IHtyped as [He_val | He_step].
+    (* e is a value *)
+    + left. simpl. apply He_val.
+    (* e takes a step *)
+    + right. destruct He_step as [e''].
+      exists (inj2 e''). 
+      constructor; assumption.
 
   (* Case: T_match *)
   - right. destruct IHtyped1 as [He1_val | He1_step].
@@ -196,7 +212,11 @@ Proof.
       constructor; assumption.
 
   (* Case: T_rec *)
-  - admit.
+  - destruct IHtyped as [He_val | He_step].
+    (* e is a value *)
+    + left; simpl; apply I. 
+    (* e takes a step *)
+    + admit.
 
   (* Case: T_app *)
   - admit.
