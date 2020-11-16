@@ -4,19 +4,49 @@ Import ListNotations.
 
 From SimpleLang Require Export dynamics.
 
-Lemma typed_inversion_nat : forall (e : expr) (t : type) (Γ : TypeEnv.type_env),
-  typed Γ e t -> exists n, e = Nat n ->
+Lemma typed_inversion_unit : forall (e : expr) (t : type) (Γ : TypeEnv.type_env),
+  typed Γ e t -> e = unit ->
+    t = TUnit.
+Proof.
+  intros e t Γ Het He_unit. destruct Het; try discriminate.
+  reflexivity.
+Qed.
+
+Lemma typed_inversion_Nat : forall (e : expr) (t : type) (Γ : TypeEnv.type_env),
+  typed Γ e t -> (exists n, e = Nat n) ->
     t = TNat.
 Proof.
-Admitted.
+  intros e t Γ Het [n He_Nat]. destruct Het; try discriminate.
+  reflexivity.
+Qed.
+
+Lemma typed_inversion_Bool : forall (e : expr) (t : type) (Γ : TypeEnv.type_env),
+  typed Γ e t -> (exists b, e = Bool b) ->
+    t = TBool.
+Proof.
+  intros e t Γ Het [b He_Bool]. destruct Het; try discriminate.
+  reflexivity.
+Qed.
+
+Lemma typed_inversion_pair : forall (e : expr) (t t1 t2 : type) (Γ : TypeEnv.type_env),
+  typed Γ e t -> (exists e1 e2, typed Γ e1 t1 /\ typed Γ e2 t2 /\ e = pair e1 e2) ->
+    t = TProd t1 t2.
+Proof.
+  intros e t t1 t2 Γ Het [e1 [e2 [He1t1 [He2t2 He_pair]]]]. destruct Het; try discriminate.
+  injection He_pair. intros. f_equal.
+Qed.
 
 Lemma canonical_forms_nat : forall (v : expr) (Γ : TypeEnv.type_env), 
   val v -> typed Γ v TNat -> exists n, v = (Nat n).
 Proof.
   intros v Γ Hv_val Hv_TNat. destruct v; try contradiction.
-  - admit. (* How to prove that [typed Γ unit TNat] is a contradiction? *)
+  - apply typed_inversion_unit in Hv_TNat.
+    + discriminate.
+    + reflexivity.
   - exists n; reflexivity.
-  - admit.
+  - apply typed_inversion_Bool in Hv_TNat.
+    + discriminate.
+    + exists b; reflexivity.
   - admit.
   - admit.
   - admit.
