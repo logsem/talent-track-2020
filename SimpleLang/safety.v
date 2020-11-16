@@ -34,7 +34,9 @@ Lemma typed_inversion_pair : forall (e : expr) (t t1 t2 : type) (Γ : TypeEnv.ty
 Proof.
   intros e t t1 t2 Γ Het [e1 [e2 [He1t1 [He2t2 He_pair]]]]. destruct Het; try discriminate.
   injection He_pair. intros. f_equal.
-Qed.
+  - rewrite H0 in Het1. admit.
+  - admit.
+Admitted.
 
 Lemma canonical_forms_nat : forall (v : expr) (Γ : TypeEnv.type_env), 
   val v -> typed Γ v TNat -> exists n, v = (Nat n).
@@ -77,20 +79,21 @@ Theorem progress : forall (e : expr) (t : type),
   typed TypeEnv.empty e t ->
     val e \/ (exists e', step e e').
 Proof. 
-  intros e t H. induction H.
+  intros e t H. remember TypeEnv.empty as Γ. induction H.
   (* Induction on typing relation *)
 
   (* Case: T_unit *)
   - left; simpl; apply I.
 
   (* Case: T_Var *)
-  - (* saving that Gamma is empty? *) admit.
+  - rewrite HeqΓ in H. apply nth_error_In in H. contradiction.
 
   (* Case: T_nat *)
   - left; simpl; apply I.
 
-  (* Case: T_add *) 
-  - right. destruct IHtyped1 as [He1_val | He1_step]. 
+  (* Case: T_add *)
+  (* FIXME: How to avoid (IHtyped1 HeqΓ??? *)
+  - right. destruct (IHtyped1 HeqΓ) as [He1_val | He1_step]. 
     (* e1 is a value *)
     + destruct IHtyped2 as [He2_val | He2_step].
       (* e2 is a value (and e1 is a value)*)
