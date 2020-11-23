@@ -292,11 +292,20 @@ Qed.
 
 (* -- PRESERVATION -- *)
 
-(* --- -lemmas --- *)
+(* --- Helping-lemmas --- *)
 
-
-
-
+(** FIXME Stinna: I'm not sure if these is redundant or necessary
+                  They're used in the T_fst and T_snd-cases.
+                  (I just gave them temporary names for the time being, since
+                  this very well might be a brain fart :-D *)
+Lemma idkprod1 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) :
+  typed Γ (pair e1 e2) (TProd t1 t2)  ->
+  typed Γ e1 t1.
+Proof. Admitted.
+Lemma idkprod2 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) :
+  typed Γ (pair e1 e2) (TProd t1 t2)  ->
+  typed Γ e2 t2.
+Proof. Admitted.
 
 
 
@@ -398,14 +407,14 @@ Proof.
     (* e takes a step *)
     + econstructor. apply IHHet; assumption.
     (* e is pair v1 v2 *)
-    + admit.
+    + subst. eapply idkprod1; apply Het. (* FIXME *)
 
   (* Case: T_snd *)
   - inversion He_step.
     (* e takes a step *)
     + econstructor. apply IHHet; assumption.
     (* e is pair v1 v2 *)
-    + admit.
+    + subst. eapply idkprod2; apply Het.  (* FIXME *)
 
   (* Case: T_inj1 *)
   - inversion He_step.
@@ -417,15 +426,26 @@ Proof.
 
   (* Case: T_match *)
   - inversion He_step.
+    (* e1 takes a step (E_match) *)
     + econstructor; [|eauto|eauto]. apply IHHet1; assumption.
+    (* e1 is inj1 v (E_match_inj1)*)
     + apply subst_lemma with (Γ1:=[]) (t':=t1); simpl.
       * assumption.
       * admit.
-    + admit.
+    (* e1 is inj2 v (E_match_inj2)*)
+    + apply subst_lemma with (Γ1:=[]) (t':=t2); simpl.
+      * assumption.
+      * admit.
 
   (* Case: T_rec *)
   - inversion He_step.
 
   (* Case: T_app *)
-  - admit.
+  - inversion He_step.
+    (* e1 takes a step (E_app1)*)
+    + econstructor; auto.
+    (* e1 is a value and e2 takes a step (E_app2)*)
+    + econstructor; [|auto]. apply Het1.
+    (* e1 is a rec and e2 is a val *)
+    + admit.
 Admitted.
