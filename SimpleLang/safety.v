@@ -4,6 +4,12 @@ Import ListNotations.
 
 From SimpleLang Require Export dynamics.
 
+
+
+(* -- PROGRESS -- *)
+
+(* --- Canonical forms-lemmas --- **)
+
 Lemma canonical_forms_nat (v : expr) (Γ : TypeEnv.type_env) :
   val v -> typed Γ v TNat -> exists n, v = (Nat n).
 Proof.
@@ -41,6 +47,13 @@ Proof.
   intros Hv Hvt.
   inversion Hvt; subst; simpl in *; try contradiction; eauto.
 Qed.
+
+
+
+
+
+
+(* --- PROGRESS PROOF --- *)
 
 Theorem progress (e : expr) (t : type) :
   typed TypeEnv.empty e t -> val e \/ (exists e', step e e').
@@ -267,6 +280,28 @@ Proof.
       constructor; assumption.
 Qed.
 
+
+
+
+
+
+
+(* ----------------------------------------------------------- *)
+
+
+
+(* -- PRESERVATION -- *)
+
+(* --- -lemmas --- *)
+
+
+
+
+
+
+
+
+(* --- PRESERVATION PROOF --- *)
 Theorem preservation : forall (Γ : TypeEnv.type_env) (e e' : expr) (t : type),
   typed Γ e t ->
   step e e' ->
@@ -387,4 +422,10 @@ Proof.
       * assumption.
       * admit.
     + admit.
+
+  (* Case: T_rec *)
+  - inversion He_step.
+
+  (* Case: T_app *)
+  - admit.
 Admitted.
