@@ -345,7 +345,7 @@ Inductive step : expr -> expr -> Prop :=
       step (app v1 e2) (app v1 e2')
   | E_app e v :
       val v ->
-      step (app (rec e) v) (subst (subst e 0 (rec e)) 1 v)
+      step (app (rec e) v) (subst (subst e 0 (shift 0 1 (rec e))) 0 v)
 .
 
 Example two_plus_two_four : step (add (Nat 2) (Nat 2)) (Nat 4).

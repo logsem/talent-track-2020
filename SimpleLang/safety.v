@@ -267,7 +267,7 @@ Proof.
     + destruct IHHet2 as [He2_val | He2_step]; [trivial| |].
       (* e2 is a value (and e1 is a value) *)
       * destruct (canonical_forms_fun e1 t1 t2 Γ He1_val) as [e]; [trivial|].
-        exists (subst (subst e 0 e1) 1 e2).
+        exists (subst (subst e 0 (shift 0 1 e1)) 0 e2).
         subst.
         constructor; assumption.
       (* e2 takes a step (and e1 is a value) *)
@@ -298,14 +298,14 @@ Qed.
                   They're used in the T_fst and T_snd-cases.
                   (I just gave them temporary names for the time being, since
                   this very well might be a brain fart :-D *)
-Lemma idkprod1 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) :
-  typed Γ (pair e1 e2) (TProd t1 t2)  ->
-  typed Γ e1 t1.
-Proof. Admitted.
-Lemma idkprod2 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) :
-  typed Γ (pair e1 e2) (TProd t1 t2)  ->
-  typed Γ e2 t2.
-Proof. Admitted.
+(* Lemma idkprod1 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) : *)
+(*   typed Γ (pair e1 e2) (TProd t1 t2)  -> *)
+(*   typed Γ e1 t1. *)
+(* Proof. Admitted. *)
+(* Lemma idkprod2 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) : *)
+(*   typed Γ (pair e1 e2) (TProd t1 t2)  -> *)
+(*   typed Γ e2 t2. *)
+(* Proof. Admitted. *)
 
 
 
@@ -407,14 +407,16 @@ Proof.
     (* e takes a step *)
     + econstructor. apply IHHet; assumption.
     (* e is pair v1 v2 *)
-    + subst. eapply idkprod1; apply Het. (* FIXME *)
+    + subst.
+      inversion Het; trivial.
 
   (* Case: T_snd *)
   - inversion He_step.
     (* e takes a step *)
     + econstructor. apply IHHet; assumption.
     (* e is pair v1 v2 *)
-    + subst. eapply idkprod2; apply Het.  (* FIXME *)
+    + subst.
+      inversion Het; trivial.
 
   (* Case: T_inj1 *)
   - inversion He_step.
@@ -431,11 +433,13 @@ Proof.
     (* e1 is inj1 v (E_match_inj1)*)
     + apply subst_lemma with (Γ1:=[]) (t':=t1); simpl.
       * assumption.
-      * admit.
+      * subst.
+        inversion Het1; trivial.
     (* e1 is inj2 v (E_match_inj2)*)
     + apply subst_lemma with (Γ1:=[]) (t':=t2); simpl.
       * assumption.
-      * admit.
+      * subst.
+        inversion Het1; trivial.
 
   (* Case: T_rec *)
   - inversion He_step.
@@ -447,5 +451,11 @@ Proof.
     (* e1 is a value and e2 takes a step (E_app2)*)
     + econstructor; [|auto]. apply Het1.
     (* e1 is a rec and e2 is a val *)
-    + admit.
-Admitted.
+    + subst.
+      apply subst_lemma with (Γ1:=[]) (t':=t1); simpl; [|trivial].
+      apply subst_lemma with (Γ1:=[]) (t':=TFun t1 t2); simpl.
+      * inversion Het1; subst.
+        trivial.
+      * apply (shift_lemma [] Γ [t1] (TFun t1 t2) (rec e)); simpl in *.
+        trivial.
+Qed.
