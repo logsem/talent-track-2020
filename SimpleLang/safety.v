@@ -289,28 +289,11 @@ Qed.
 (* ----------------------------------------------------------- *)
 
 
-
 (* -- PRESERVATION -- *)
-
-(* --- Helping-lemmas --- *)
-
-(** FIXME Stinna: I'm not sure if these is redundant or necessary
-                  They're used in the T_fst and T_snd-cases.
-                  (I just gave them temporary names for the time being, since
-                  this very well might be a brain fart :-D *)
-(* Lemma idkprod1 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) : *)
-(*   typed Γ (pair e1 e2) (TProd t1 t2)  -> *)
-(*   typed Γ e1 t1. *)
-(* Proof. Admitted. *)
-(* Lemma idkprod2 (e1 e2 : expr) (t1 t2 : type) (Γ : TypeEnv.type_env) : *)
-(*   typed Γ (pair e1 e2) (TProd t1 t2)  -> *)
-(*   typed Γ e2 t2. *)
-(* Proof. Admitted. *)
-
-
 
 
 (* --- PRESERVATION PROOF --- *)
+
 Theorem preservation : forall (Γ : TypeEnv.type_env) (e e' : expr) (t : type),
   typed Γ e t ->
   step e e' ->
