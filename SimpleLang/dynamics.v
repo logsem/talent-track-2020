@@ -301,17 +301,17 @@ Inductive step : expr -> expr -> Prop :=
       step e2 e2' ->
       step (pair v1 e2) (pair v1 e2')
   (** fst **)
-  | E_fst1 e1 e1' :
-      step e1 e1' ->
-      step (fst e1) (fst e1')
+  | E_fst1 e e' :
+      step e e' ->
+      step (fst e) (fst e')
   | E_fst v1 v2 :
       val v1 ->
       val v2 ->
       step (fst (pair v1 v2)) v1
   (** snd **)
-  | E_snd1 e1 e1' :
-      step e1 e1' ->
-      step (snd e1) (snd e1')
+  | E_snd1 e e' :
+      step e e' ->
+      step (snd e) (snd e')
   | E_snd v1 v2 :
       val v1 ->
       val v2 ->
@@ -345,7 +345,7 @@ Inductive step : expr -> expr -> Prop :=
       step (app v1 e2) (app v1 e2')
   | E_app e v :
       val v ->
-      step (app (rec e) v) (subst (subst e 0 (rec e)) 1 v)
+      step (app (rec e) v) (subst (subst e 0 (shift 0 1 (rec e))) 0 v)
 .
 
 Example two_plus_two_four : step (add (Nat 2) (Nat 2)) (Nat 4).

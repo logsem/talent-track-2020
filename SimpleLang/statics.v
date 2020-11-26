@@ -71,7 +71,7 @@ End TypeEnv.
 
 Inductive typed (Γ : TypeEnv.type_env) : expr -> type -> Prop :=
   | T_unit : typed Γ unit TUnit
-  | T_Var (x : id) (t : type) :
+  | T_var (x : id) (t : type) :
       TypeEnv.lookup Γ x = Some t ->
       typed Γ (Var x) t
 
@@ -92,15 +92,15 @@ Inductive typed (Γ : TypeEnv.type_env) : expr -> type -> Prop :=
   | T_le (e1 e2 : expr) : 
       typed Γ e1 TNat ->
       typed Γ e2 TNat ->
-      typed Γ (le e1 e2) TNat
+      typed Γ (le e1 e2) TBool
   | T_lt (e1 e2 : expr) : 
       typed Γ e1 TNat ->
       typed Γ e2 TNat ->
-      typed Γ (lt e1 e2) TNat
+      typed Γ (lt e1 e2) TBool
   | T_eq (e1 e2 : expr) : 
       typed Γ e1 TNat ->
       typed Γ e2 TNat ->
-      typed Γ (eq e1 e2) TNat
+      typed Γ (eq e1 e2) TBool
 
   (* booleans*)
   | T_bool (b : bool) : typed Γ (Bool b) TBool
