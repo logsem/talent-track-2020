@@ -7,7 +7,7 @@ From SimpleLang Require Export statics.
 
 (* SUBSTITUTION *)
 (** helper function: shift 
-    in for all variables in e with index under i, add j to i *)
+    For all variables in e with index greater than i, add j to the index of that variable *)
 Fixpoint shift (i j : nat) (e : expr) : expr :=
 match e with
   | unit => unit
