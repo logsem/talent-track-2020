@@ -151,9 +151,9 @@ Lemma subst_lemma : forall (Γ1 Γ2 : TypeEnv.type_env) (t t' : type) (e e' : ex
 Proof.
   intros Γ1 Γ2 t t' e e' Het.
   remember (Γ1 ++ t' :: Γ2) as Ξ. (* remember (Γ1 ++ Γ2) as Ξ. remember (Γ1 ++ t' :: Γ2) as Ξ'.*)
-  revert Γ1 Γ2 HeqΞ e'. (* HeqΞ'. *)
+  revert Γ1 Γ2 HeqΞ e'.
   induction Het as [| ??? Hlu| | | | | | | | | | | | | | | | |];
-    intros Γ1 Γ2 HeqΞ He't'.
+    intros Γ1 Γ2 HeqΞ e'.
   - simpl; constructor.
   - simpl.
     destruct (length Γ1 =? x) eqn:Hx.
