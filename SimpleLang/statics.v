@@ -1,7 +1,7 @@
 Require Import Coq.Lists.List.
 
 
-(* SYNTAX *)
+(* -- SYNTAX  -- *)
 Definition id := nat.
 
 

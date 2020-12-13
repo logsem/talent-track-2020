@@ -8,6 +8,7 @@ From SimpleLang Require Export statics.
 
 (* -- SUBSTITUTION -- *)
 
+(* --- Shift-function --- *)
 (** For all variables in e with index greater than i, add j to the index of that variable *)
 Fixpoint shift (i j : nat) (e : expr) : expr :=
   match e with
@@ -42,6 +43,7 @@ Fixpoint shift (i j : nat) (e : expr) : expr :=
   | app e1 e2 => app (shift i j e1) (shift i j e2)
   end.
 
+(* --- Substitution-function *)
 (** in expression e substitute variable i with s *)
 Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
   match e with
@@ -93,6 +95,11 @@ Proof.
 Qed.
 
 
+
+
+
+(* --- Shift-lemma --- *)
+
 Lemma shift_lemma : forall (Γ1 Γ2 Δ : TypeEnv.type_env) (t : type) (e : expr),
   typed (Γ1 ++ Γ2) e t ->
   typed (Γ1 ++ Δ ++ Γ2) (shift (length Γ1) (length Δ) e) t.
@@ -143,6 +150,10 @@ Proof.
     rewrite HeqΞ; reflexivity.
   - econstructor; eauto.
 Qed.
+
+
+
+(* --- Substitution-lemma --- *)
 
 Lemma subst_lemma : forall (Γ1 Γ2 : TypeEnv.type_env) (t t' : type) (e e' : expr),
   typed (Γ1 ++ t' :: Γ2) e t ->
@@ -219,7 +230,15 @@ Proof.
 Qed.
 
 
-(* OPERATIONAL SEMANTICS *)
+
+
+
+
+
+(* ----------------------------------------------------------- *)
+
+(* -- OPERATIONAL SEMANTICS -- *)
+
 Inductive step : expr -> expr -> Prop :=
   (* numbers *)
   (** add **)
