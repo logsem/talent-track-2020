@@ -8,7 +8,7 @@ From SimpleLang Require Export dynamics.
 
 (* -- PROGRESS -- *)
 
-(* --- Canonical forms-lemmas --- **)
+(* --- Canonical forms lemmas --- **)
 
 Lemma canonical_forms_nat (v : expr) (Γ : TypeEnv.type_env) :
   val v -> typed Γ v TNat -> exists n, v = (Nat n).

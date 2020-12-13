@@ -5,11 +5,12 @@ Require Import Coq.micromega.Lia.
 
 From SimpleLang Require Export statics.
 
-(* SUBSTITUTION *)
-(** helper function: shift 
-    For all variables in e with index greater than i, add j to the index of that variable *)
+
+(* -- SUBSTITUTION -- *)
+
+(** For all variables in e with index greater than i, add j to the index of that variable *)
 Fixpoint shift (i j : nat) (e : expr) : expr :=
-match e with
+  match e with
   | unit => unit
   | Var n => if (n <? i) then (Var n) else (Var (n+j))
   
@@ -39,8 +40,7 @@ match e with
   (* recursive functions *)
   | rec e1 => rec (shift (S (S i)) j e1)
   | app e1 e2 => app (shift i j e1) (shift i j e2)
-end
-.
+  end.
 
 (** in expression e substitute variable i with s *)
 Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
@@ -78,8 +78,7 @@ Fixpoint subst (e : expr) (i : id) (s : expr) : expr :=
   (* recursive functions *)
   | rec e1 => rec (subst e1 (S (S i)) (shift 0 2 s))
   | app e1 e2 => app (subst e1 i s) (subst e2 i s)
-  end
-.
+  end.
 
 
 Lemma shift_0 : forall (i : nat) (e : expr),
@@ -92,6 +91,7 @@ Proof.
     + reflexivity.
     + rewrite Nat.add_comm. reflexivity.
 Qed.
+
 
 Lemma shift_lemma : forall (Γ1 Γ2 Δ : TypeEnv.type_env) (t : type) (e : expr),
   typed (Γ1 ++ Γ2) e t ->
